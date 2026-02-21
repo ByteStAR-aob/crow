@@ -4,18 +4,50 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>World Words Hub — Pattern Stacking Engine.</title>
+
+  <!-- Optional: CSP (safe, doesn't change UI). Uncomment when you want.
+  <meta http-equiv="Content-Security-Policy"
+  content="
+  default-src 'self';
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src https://fonts.gstatic.com;
+  script-src 'self' 'unsafe-inline';
+  connect-src https://api.datamuse.com https://api.dictionaryapi.dev;
+  img-src 'self' data:;
+  base-uri 'self';
+  frame-ancestors 'none';
+  ">
+  -->
+
   <style>
     :root {
+      /* Dark theme (default) */
       --bg: #070b14;
       --panel: #0f172a;
       --accent: #7c3aed;
       --accent-glow: rgba(124, 58, 237, 0.3);
       --text-main: #e2e8f0;
       --text-muted: #94a3b8;
-      --border: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.06);
       --glass: rgba(15, 23, 42, 0.6);
       --danger:#ff6b6b;
       --good:#22c55e;
+      --shadow: rgba(0,0,0,0.28);
+    }
+
+    /* Light theme overrides */
+    body[data-theme="light"]{
+      --bg: #f6f7fb;
+      --panel: #ffffff;
+      --accent: #6d28d9;
+      --accent-glow: rgba(109, 40, 217, 0.22);
+      --text-main: #0b1220;
+      --text-muted: #475569;
+      --border: rgba(15, 23, 42, 0.10);
+      --glass: rgba(255, 255, 255, 0.75);
+      --danger:#dc2626;
+      --good:#16a34a;
+      --shadow: rgba(2,6,23,0.10);
     }
 
     * { box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
@@ -40,14 +72,22 @@
       gap: 12px;
     }
 
+    .header-right{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
     .memory-pill {
-      background: rgba(124, 58, 237, 0.1);
-      border: 1px solid var(--accent);
+      background: rgba(124, 58, 237, 0.10);
+      border: 1px solid rgba(124, 58, 237, 0.55);
       padding: 4px 12px;
       border-radius: 999px;
       font-size: 0.82rem;
       color: var(--accent);
-      font-weight: 700;
+      font-weight: 800;
       white-space: nowrap;
     }
 
@@ -82,6 +122,7 @@
       padding: 1.2rem;
       margin-bottom: 1rem;
       transition: 0.2s;
+      box-shadow: 0 10px 24px var(--shadow);
     }
     .card:hover { border-color: rgba(124,58,237,0.45); }
 
@@ -102,16 +143,23 @@
       display:inline-block;
       transition: 0.15s;
     }
-    .tag:hover { background: rgba(124, 58, 237, 0.15); color: white; }
+    body[data-theme="light"] .tag{
+      background: rgba(2, 6, 23, 0.03);
+    }
+    .tag:hover { background: rgba(124, 58, 237, 0.15); color: var(--text-main); }
     .tag.good { border-color: rgba(34,197,94,0.35); color: rgba(34,197,94,0.95); }
     .tag.bad  { border-color: rgba(255,107,107,0.35); color: rgba(255,107,107,0.95); }
 
-    /* Brand tints (subtle) */
+    /* Brand tints */
     .tag.brand-yt   { border-color: rgba(255,0,0,0.35);     color: rgba(255,110,110,0.95); }
     .tag.brand-wiki { border-color: rgba(180,180,180,0.35); color: rgba(225,225,225,0.95); }
     .tag.brand-wikt { border-color: rgba(90,160,255,0.35);  color: rgba(170,210,255,0.95); }
     .tag.brand-dict { border-color: rgba(124,58,237,0.55);  color: rgba(205,175,255,0.95); }
     .tag.brand-web  { border-color: rgba(34,197,94,0.35);   color: rgba(34,197,94,0.95); }
+
+    body[data-theme="light"] .tag.brand-wiki { color: rgba(15,23,42,0.85); border-color: rgba(15,23,42,0.25); }
+    body[data-theme="light"] .tag.brand-wikt { color: rgba(29,78,216,0.90); border-color: rgba(29,78,216,0.25); }
+    body[data-theme="light"] .tag.brand-dict { color: rgba(109,40,217,0.95); border-color: rgba(109,40,217,0.35); }
 
     .search-container {
       display: flex;
@@ -126,7 +174,7 @@
       border-radius: 999px;
       padding: 6px 6px 6px 18px;
       width: 100%;
-      max-width: 720px;
+      max-width: 760px;
       transition: 0.3s;
       backdrop-filter: blur(10px);
       gap: 10px;
@@ -138,7 +186,7 @@
     #mainSearch {
       background: transparent;
       border: none;
-      color: white;
+      color: var(--text-main);
       font-size: 1rem;
       flex: 1;
       outline: none;
@@ -167,6 +215,58 @@
     .btn:disabled{
       opacity:0.55;
       cursor:not-allowed;
+    }
+
+    /* Small icon-ish buttons */
+    .pill-btn{
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      transition: 0.15s;
+      user-select:none;
+    }
+    .pill-btn:hover{
+      border-color: rgba(124,58,237,0.45);
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
+    .select{
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 8px 34px 8px 12px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      position: relative;
+    }
+    .select-wrap{
+      position: relative;
+      display:inline-block;
+    }
+    .select-wrap:after{
+      content:"▾";
+      position:absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events:none;
+      font-weight: 900;
     }
 
     footer {
@@ -230,6 +330,7 @@
       font-weight: 900;
       letter-spacing: 0.3px;
     }
+    body[data-theme="light"] .wordBtn{ background: rgba(2,6,23,0.03); }
     .wordBtn:hover{ border-color: rgba(124,58,237,0.55); transform: translateY(-1px); }
 
     .divider{
@@ -249,8 +350,16 @@
       gap: 12px;
     }
     .savedItem:hover{ background: rgba(255,255,255,0.02); border-radius: 10px; padding-left: 10px; padding-right: 10px; }
+    body[data-theme="light"] .savedItem:hover{ background: rgba(2,6,23,0.03); }
     .savedWord{ font-weight: 1000; letter-spacing: 1px; }
     .savedMeta{ font-size: 0.8rem; opacity: 0.65; }
+
+    .tiny-divider{
+      height: 1px;
+      width: 100%;
+      background: var(--border);
+      margin: 8px 0;
+    }
   </style>
 </head>
 
@@ -258,20 +367,34 @@
 <header>
   <div>
     <h1 style="font-size: 1.05rem; margin: 0; letter-spacing: 1px;">WORLD WORDS HUB</h1>
-    <p style="font-size: 0.65rem; margin: 2px 0 0; color: var(--text-muted);">Decode Language. Find Patterns.
-</p>
+    <p id="subtitleLine" style="font-size: 0.65rem; margin: 2px 0 0; color: var(--text-muted);">Decode Language. Find Patterns.</p>
   </div>
-  <div class="memory-pill" id="memoryPill">🧠 Memory: 0 saved</div>
+
+  <div class="header-right">
+    <!-- Language dropdown -->
+    <div class="select-wrap" title="Language">
+      <select class="select" id="langSelect" aria-label="Language">
+        <option value="en">EN</option>
+        <option value="es">ES</option>
+        <option value="mix">EN + ES</option>
+      </select>
+    </div>
+
+    <!-- Theme toggle -->
+    <button class="pill-btn" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">🌙 Dark</button>
+
+    <div class="memory-pill" id="memoryPill">🧠 Memory: 0 saved</div>
+  </div>
 </header>
 
 <main class="dashboard">
   <!-- NOTES -->
   <section id="notes-view" class="side-panel">
-    <h2>Saved Outputs</h2>
+    <h2 id="notesTitle">Saved Outputs</h2>
 
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-        <div class="muted" style="font-size:0.9rem;">
+        <div class="muted" style="font-size:0.9rem;" id="notesHint">
           Tap a saved word to load it in the Hub.
         </div>
         <button class="btn secondary" id="clearSaved">Clear Saved</button>
@@ -292,7 +415,7 @@
     </div>
 
     <div class="wordHero">
-      <p class="muted" style="margin:0; letter-spacing:2px; text-transform:uppercase; font-size:0.8rem; color: var(--accent);">
+      <p class="muted" id="resultsForLabel" style="margin:0; letter-spacing:2px; text-transform:uppercase; font-size:0.8rem; color: var(--accent);">
         Results for:
       </p>
       <h1 id="displayWord">—</h1>
@@ -307,8 +430,8 @@
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
         <div>
-          <div class="muted" style="font-size:0.8rem; letter-spacing:2px; text-transform:uppercase;">Generated Words</div>
-          <div class="muted" style="font-size:0.85rem;">Click one word — it will show ONE card below.</div>
+          <div class="muted" id="generatedWordsLabel" style="font-size:0.8rem; letter-spacing:2px; text-transform:uppercase;">Generated Words</div>
+          <div class="muted" id="generatedWordsHint" style="font-size:0.85rem;">Click one word — it will show ONE card below.</div>
         </div>
         <div id="dictBadge" class="tag">Awaiting input…</div>
       </div>
@@ -322,8 +445,8 @@
     </div>
 
     <div style="margin-top: 1.2rem; opacity: 0.95;">
-      <h2>Synthesis</h2>
-      <div class="card" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), transparent);">
+      <h2 id="synthesisTitle">Synthesis</h2>
+      <div class="card" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.10), transparent);">
         <p id="synthesisText" style="line-height: 1.6; font-style: italic; margin:0;">
           "The engine identifies patterns. The human determines truth."
         </p>
@@ -333,16 +456,15 @@
 </main>
 
 <nav class="mobile-nav">
-  <button class="btn" style="padding:8px 15px;" onclick="showView('notes-view')">Notes</button>
-  <button class="btn" style="padding:8px 15px;" onclick="showView('feed-view')">Hub</button>
+  <button class="btn" style="padding:8px 15px;" onclick="showView('notes-view')" id="mobileNotes">Notes</button>
+  <button class="btn" style="padding:8px 15px;" onclick="showView('feed-view')" id="mobileHub">Hub</button>
 </nav>
 
 <footer>
-  © 2026 World Words Hub • Powered by CROW Lens.  
+  © 2026 World Words Hub • Powered by CROW Lens.
   <a href="https://www.bluecomet.work" target="_blank" rel="noopener noreferrer">🌐</a>
-  A word is not just a word — it’s a container of patterns, sounds, and meanings.
+  <span id="footerLine">A word is not just a word — it’s a container of patterns, sounds, and meanings.</span>
 </footer>
-
 
 <script>
   const $ = (id)=>document.getElementById(id);
@@ -365,23 +487,165 @@
   const clearSavedBtn = $("clearSaved");
   const memoryPill  = $("memoryPill");
 
+  const langSelect  = $("langSelect");
+  const themeToggle = $("themeToggle");
+
+  const subtitleLine = $("subtitleLine");
+  const resultsForLabel = $("resultsForLabel");
+  const generatedWordsLabel = $("generatedWordsLabel");
+  const generatedWordsHint = $("generatedWordsHint");
+  const synthesisTitle = $("synthesisTitle");
+  const footerLine = $("footerLine");
+
+  const notesTitle = $("notesTitle");
+  const notesHint  = $("notesHint");
+  const mobileNotes = $("mobileNotes");
+  const mobileHub   = $("mobileHub");
+
   const PAGE_SIZE = 20;
   const NOVELTY_MIN = 0.20;
 
   const MEM_KEY = "wwh_saved_runs_v1";
+  const THEME_KEY = "wwh_theme_v1";
+  const LANG_KEY = "wwh_lang_v1";
 
+  // --------------------
+  // i18n strings
+  // --------------------
+  const I18N = {
+    en: {
+      subtitle: "Decode Language. Find Patterns.",
+      placeholder: "Type a real dictionary word…",
+      execute: "Execute",
+      clear: "Clear",
+      more: "Generate More",
+      save: "Save Output",
+      resultsFor: "Results for:",
+      generatedWords: "Generated Words",
+      generatedHint: "Click one word — it will show ONE card below.",
+      synthesis: "Synthesis",
+      synthDefault: "\"The engine identifies patterns. The human determines truth.\"",
+      awaiting: "Awaiting input…",
+      enterAndExecute: "Enter a word and press Execute.",
+      cleared: "Cleared. Type a word and press Execute.",
+      checkingDict: "Checking dictionary…",
+      validating: "Validating input word…",
+      runningStack: "Running stack…",
+      readyTap: (w)=>`"${w}" ready. Tap any generated word to open its card.`,
+      expandedTap: (w)=>`"${w}" expanded. Tap a word to open its card.`,
+      expanding: "Expanding outward…",
+      stopPoint: "Natural stop point reached: no new high-novelty patterns remain.",
+      saved: "Saved output to Notes.",
+      deletedOne: "Deleted one saved output.",
+      clearedSaved: "Saved outputs cleared.",
+      notes: "Saved Outputs",
+      notesHint: "Tap a saved word to load it in the Hub.",
+      mobileNotes: "Notes",
+      mobileHub: "Hub",
+      footer: "A word is not just a word — it’s a container of patterns, sounds, and meanings.",
+      badgeDictOk: "Dictionary ✓",
+      badgeDictSoftOk: "Not verified — ran anyway",
+      badgeNetworkSoft: "Dictionary offline — ran anyway",
+      themeDark: "🌙 Dark",
+      themeLight: "☀️ Light",
+      wordNotVerifiedTitle: "This input was not verified by a dictionary API, but the run executed anyway."
+    },
+    es: {
+      subtitle: "Decodifica lenguaje. Encuentra patrones.",
+      placeholder: "Escribe una palabra real del diccionario…",
+      execute: "Ejecutar",
+      clear: "Limpiar",
+      more: "Generar más",
+      save: "Guardar",
+      resultsFor: "Resultados para:",
+      generatedWords: "Palabras generadas",
+      generatedHint: "Toca una palabra — verás UNA tarjeta abajo.",
+      synthesis: "Síntesis",
+      synthDefault: "\"El motor identifica patrones. El humano determina la verdad.\"",
+      awaiting: "Esperando…",
+      enterAndExecute: "Escribe una palabra y presiona Ejecutar.",
+      cleared: "Listo. Escribe una palabra y presiona Ejecutar.",
+      checkingDict: "Verificando diccionario…",
+      validating: "Validando palabra…",
+      runningStack: "Ejecutando motor…",
+      readyTap: (w)=>`"${w}" listo. Toca una palabra generada para ver su tarjeta.`,
+      expandedTap: (w)=>`"${w}" expandido. Toca una palabra para ver su tarjeta.`,
+      expanding: "Expandiendo…",
+      stopPoint: "Punto de parada: no quedan patrones nuevos con alta novedad.",
+      saved: "Guardado en Notas.",
+      deletedOne: "Se eliminó un guardado.",
+      clearedSaved: "Guardados borrados.",
+      notes: "Guardados",
+      notesHint: "Toca una palabra guardada para cargarla en el Hub.",
+      mobileNotes: "Notas",
+      mobileHub: "Hub",
+      footer: "Una palabra no es solo una palabra — es un contenedor de patrones, sonidos y significados.",
+      badgeDictOk: "Diccionario ✓",
+      badgeDictSoftOk: "No verificado — se ejecutó",
+      badgeNetworkSoft: "Diccionario sin conexión — se ejecutó",
+      themeDark: "🌙 Oscuro",
+      themeLight: "☀️ Claro",
+      wordNotVerifiedTitle: "Esta palabra no fue verificada por el diccionario, pero el motor se ejecutó."
+    }
+  };
+
+  function getUiLang(){
+    // UI language follows dropdown unless merge selected, then keep English UI (simple + consistent)
+    const v = langSelect.value;
+    return (v === "es") ? "es" : "en";
+  }
+  function t(key, ...args){
+    const L = I18N[getUiLang()] || I18N.en;
+    const val = L[key];
+    return (typeof val === "function") ? val(...args) : val;
+  }
+  function applyUiText(){
+    subtitleLine.textContent = t("subtitle");
+    mainSearch.placeholder   = t("placeholder");
+    executeBtn.textContent   = t("execute");
+    clearBtn.textContent     = t("clear");
+    moreBtn.textContent      = t("more");
+    saveBtn.textContent      = t("save");
+    resultsForLabel.textContent = t("resultsFor");
+    generatedWordsLabel.textContent = t("generatedWords");
+    generatedWordsHint.textContent  = t("generatedHint");
+    synthesisTitle.textContent = t("synthesis");
+    footerLine.textContent = t("footer");
+    notesTitle.textContent = t("notes");
+    notesHint.textContent  = t("notesHint");
+    mobileNotes.textContent = t("mobileNotes");
+    mobileHub.textContent   = t("mobileHub");
+
+    // If we're in idle state, refresh default messages
+    if(!state.inputWord){
+      setBadge(t("awaiting"));
+      setStatus(t("enterAndExecute"));
+      synthesisText.textContent = t("synthDefault");
+    }
+    // Theme label
+    refreshThemeToggleLabel();
+  }
+
+  // --------------------
+  // State
+  // --------------------
   let state = {
     inputWord: "",
     generation: 0,
     used: new Set(),
     lastBatch: [],
+    allResults: [],      // NEW: accumulate across generations (Save = whole session)
     poolMeta: new Map(),
     seedCursor: 0,
     running: false,
   };
 
   function normalizeWord(s){
-    return (s||"").toLowerCase().trim().normalize("NFKD").replace(/[^a-z'-]/g,"");
+    return (s||"")
+      .toLowerCase()
+      .trim()
+      .normalize("NFKD")
+      .replace(/[^a-z\u00C0-\u017FñÑáéíóúüÁÉÍÓÚÜ'-]/g,""); // allow basic Spanish letters too
   }
 
   function escapeHtml(s){
@@ -395,6 +659,46 @@
     dictBadge.className = "tag" + (cls ? " " + cls : "");
     dictBadge.textContent = text;
   }
+
+  // --------------------
+  // Theme
+  // --------------------
+  function getTheme(){
+    return localStorage.getItem(THEME_KEY) || "dark";
+  }
+  function setTheme(theme){
+    document.body.setAttribute("data-theme", theme);
+    localStorage.setItem(THEME_KEY, theme);
+    refreshThemeToggleLabel();
+  }
+  function refreshThemeToggleLabel(){
+    const theme = document.body.getAttribute("data-theme") || "dark";
+    themeToggle.textContent = (theme === "light") ? t("themeLight") : t("themeDark");
+  }
+  themeToggle.addEventListener("click", ()=>{
+    const cur = document.body.getAttribute("data-theme") || "dark";
+    setTheme(cur === "dark" ? "light" : "dark");
+  });
+
+  // --------------------
+  // Language
+  // --------------------
+  function getLangMode(){
+    // en / es / mix
+    return langSelect.value || "en";
+  }
+  function setLangMode(v){
+    langSelect.value = v;
+    localStorage.setItem(LANG_KEY, v);
+    applyUiText();
+    // Update badge if an active word is loaded
+    if(state.inputWord){
+      // keep current badge as-is; next run will reflect language mode
+    }
+  }
+  langSelect.addEventListener("change", ()=>{
+    setLangMode(langSelect.value);
+  });
 
   // --------------------
   // Memory (saved runs)
@@ -429,6 +733,7 @@
         <div>
           <div class="savedWord">${escapeHtml(r.word)}</div>
           <div class="savedMeta muted">gen ${r.generation || 1} • ${new Date(r.createdAt).toLocaleString()}</div>
+          ${r.langMode ? `<div class="savedMeta muted">mode: ${escapeHtml(r.langMode)}</div>` : ""}
         </div>
         <div style="display:flex; gap:8px; align-items:center;">
           <div class="tag">Open</div>
@@ -455,7 +760,7 @@
         const runs = loadRuns();
         runs.splice(idx, 1);
         saveRuns(runs);
-        setStatus("Deleted one saved output.");
+        setStatus(t("deletedOne"));
         setTimeout(()=>setStatus(""), 900);
       });
     });
@@ -464,29 +769,49 @@
   clearSavedBtn.addEventListener("click", ()=>{
     localStorage.removeItem(MEM_KEY);
     renderSavedRuns();
-    setStatus("Saved outputs cleared.");
+    setStatus(t("clearedSaved"));
     setTimeout(()=>setStatus(""), 1200);
   });
 
   // --------------------
-  // Dictionary validation
+  // Dictionary validation (SOFT)
   // --------------------
-  const dictCache = new Map();
+  // dictionaryapi.dev language codes: en, es, etc.
+  // We'll run a check but NEVER block. We'll only badge it.
+  const dictCache = new Map(); // key: lang|word -> { ok:boolean, uncertain:boolean }
 
-  async function isRealDictionaryWord(word){
+  async function dictCheck(word, lang){
     const w = normalizeWord(word);
-    if(!w || w.length < 2) return false;
-    if(dictCache.has(w)) return dictCache.get(w);
+    const key = `${lang}|${w}`;
+    if(!w || w.length < 2) return { ok:false, uncertain:false };
+    if(dictCache.has(key)) return dictCache.get(key);
 
     try{
-      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(w)}`);
-      const ok = res.ok;
-      dictCache.set(w, ok);
-      return ok;
+      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/${encodeURIComponent(lang)}/${encodeURIComponent(w)}`);
+      const result = { ok: res.ok, uncertain: false };
+      dictCache.set(key, result);
+      return result;
     }catch(e){
-      dictCache.set(w, false);
-      return false;
+      const result = { ok: true, uncertain: true }; // offline -> allow
+      dictCache.set(key, result);
+      return result;
     }
+  }
+
+  function languageBadgeFromVerdict(verdict){
+    if(verdict.uncertain){
+      setBadge(t("badgeNetworkSoft"), "bad");
+      dictBadge.title = t("wordNotVerifiedTitle");
+      return;
+    }
+    if(verdict.ok){
+      setBadge(t("badgeDictOk"), "good");
+      dictBadge.title = "";
+      return;
+    }
+    // Not verified, but allowed
+    setBadge(t("badgeDictSoftOk"), "bad");
+    dictBadge.title = t("wordNotVerifiedTitle");
   }
 
   // --------------------
@@ -527,7 +852,7 @@
     seeds.add(w.replace(/ph/g,"f"));
     seeds.add(w.replace(/c(?=[eiy])/g,"s"));
     seeds.add(w.replace(/tion/g,"shun"));
-    seeds.add(w.replace(/[aeiou]/g,""));
+    seeds.add(w.replace(/[aeiouáéíóúü]/g,""));
 
     seeds.add(w.split("").reverse().join(""));
     seeds.add(w.replace(/w/g,"uu"));
@@ -549,7 +874,7 @@
     if(meta.types.has("ml")) s += 0.10;
     if(meta.types.has("sp")) s += 0.08;
 
-    const vowel = (w.match(/[aeiou]/g)||[]).length;
+    const vowel = (w.match(/[aeiouáéíóúü]/g)||[]).length;
     s += Math.min(0.18, vowel * 0.03);
 
     if(w.length >= 4 && w.length <= 9) s += 0.12;
@@ -583,6 +908,39 @@
     }
   }
 
+  function datamuseParamsForLayer(L, cleanSeed, vocab){
+    // vocab: "en" | "es"
+    const v = vocab === "es" ? "&v=es" : ""; // Datamuse supports v=es for Spanish vocabulary
+    if(L.type === "sl"){
+      return `sl=${encodeURIComponent(cleanSeed)}&max=18${v}`;
+    } else if(L.type === "ml"){
+      return `ml=${encodeURIComponent(cleanSeed)}&max=18${v}`;
+    } else if(L.type === "sp"){
+      const pattern = cleanSeed.length >= 4 ? `*${cleanSeed}*` : `${cleanSeed}*`;
+      return `sp=${encodeURIComponent(pattern)}&max=18${v}`;
+    } else {
+      // "mix"
+      return null;
+    }
+  }
+
+  async function queryLayer(L, cleanSeed, vocab){
+    try{
+      if(L.type === "mix"){
+        const v = vocab === "es" ? "&v=es" : "";
+        const a = await dm(`sl=${encodeURIComponent(cleanSeed)}&max=10${v}`);
+        const b = await dm(`ml=${encodeURIComponent(cleanSeed)}&max=10${v}`);
+        const c = await dm(`sp=${encodeURIComponent("*"+cleanSeed+"*")}&max=10${v}`);
+        return [...a,...b,...c];
+      }
+      const params = datamuseParamsForLayer(L, cleanSeed, vocab);
+      if(!params) return [];
+      return await dm(params);
+    }catch(e){
+      return [];
+    }
+  }
+
   async function runOneGeneration(seedWords){
     const layers = layerReasons();
     const seeds = [];
@@ -590,34 +948,22 @@
       buildSeeds(sw).forEach(s => seeds.push(s));
     }
 
+    const mode = getLangMode(); // en / es / mix
+    const vocabs = (mode === "mix") ? ["en","es"] : [mode];
+
     for(const L of layers){
       const seed = seeds[(state.seedCursor++) % seeds.length] || normalizeWord(state.inputWord);
       const cleanSeed = normalizeWord(seed);
       if(!cleanSeed || cleanSeed.length < 2) continue;
 
-      let results = [];
-      try{
-        if(L.type === "sl"){
-          results = await dm(`sl=${encodeURIComponent(cleanSeed)}&max=18`);
-        } else if(L.type === "ml"){
-          results = await dm(`ml=${encodeURIComponent(cleanSeed)}&max=18`);
-        } else if(L.type === "sp"){
-          const pattern = cleanSeed.length >= 4 ? `*${cleanSeed}*` : `${cleanSeed}*`;
-          results = await dm(`sp=${encodeURIComponent(pattern)}&max=18`);
-        } else {
-          const a = await dm(`sl=${encodeURIComponent(cleanSeed)}&max=10`);
-          const b = await dm(`ml=${encodeURIComponent(cleanSeed)}&max=10`);
-          const c = await dm(`sp=${encodeURIComponent("*"+cleanSeed+"*")}&max=10`);
-          results = [...a,...b,...c];
+      // run for each vocab (merge mode runs both)
+      for(const vocab of vocabs){
+        const results = await queryLayer(L, cleanSeed, vocab);
+        for(const r of results){
+          const cand = normalizeWord(r.word);
+          if(!cand || cand.length < 3) continue;
+          mergeCandidate(cand, L.layer, L.type, L.reason(cleanSeed, cand), cleanSeed);
         }
-      }catch(e){
-        results = [];
-      }
-
-      for(const r of results){
-        const cand = normalizeWord(r.word);
-        if(!cand || cand.length < 3) continue;
-        mergeCandidate(cand, L.layer, L.type, L.reason(cleanSeed, cand), cleanSeed);
       }
     }
 
@@ -641,6 +987,7 @@
       state.used.add(item.word);
     }
 
+    // "novelty" here is mostly a health signal for new results
     const novelty = batch.length ? batch.filter(x=>x.isNew).length / batch.length : 0;
     return { batch, novelty };
   }
@@ -699,7 +1046,7 @@
     const div = document.createElement("div");
     div.className = "card";
     div.style.borderLeft = "3px solid var(--accent)";
-    div.id = "scorecard"; // NEW: stable anchor target
+    div.id = "scorecard";
 
     div.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
@@ -721,24 +1068,20 @@
     return div;
   }
 
-  // FIXED: scroll AFTER DOM paints + use stable anchor (#scorecard)
   function openSingleCard(item){
-  cardsArea.innerHTML = "";
-  cardsArea.appendChild(buildCard(item));
-  synthesisText.textContent = `"${item.word}" • ${bestReason(item)}`;
-  scrollToScorecard();
-}
+    cardsArea.innerHTML = "";
+    cardsArea.appendChild(buildCard(item));
+    synthesisText.textContent = `"${item.word}" • ${bestReason(item)}`;
+    scrollToScorecard();
+  }
 
-function scrollToScorecard(){
-  const hub = document.getElementById("feed-view");
-  if(!hub) return;
-
-  hub.scrollTo({
-    top: hub.scrollHeight,
-    behavior: "smooth"
-  });
-}
-
+  function scrollToScorecard(){
+    const card = document.getElementById("scorecard");
+    if(!card) return;
+    requestAnimationFrame(() => {
+      card.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 
   function renderWordButtons(batch){
     wordListEl.innerHTML = "";
@@ -765,36 +1108,48 @@ function scrollToScorecard(){
     moreBtn.disabled = true;
     saveBtn.disabled = true;
 
-    setBadge("Checking dictionary…");
-    setStatus("Validating input word (must be real)…");
+    setBadge(t("checkingDict"));
+    setStatus(t("validating"));
 
-    const ok = await isRealDictionaryWord(raw);
-    if(!ok){
-      setBadge("Not a dictionary word", "bad");
-      setStatus("No run executed. Type a real dictionary word and try again.");
-      state.running = false;
-      executeBtn.disabled = false;
-      return;
+    // Soft validation: check, but don't block.
+    // If merge mode: try English then Spanish (treat ok if either ok)
+    const mode = getLangMode();
+    let verdict = { ok:false, uncertain:false };
+
+    if(mode === "mix"){
+      const v1 = await dictCheck(raw, "en");
+      const v2 = await dictCheck(raw, "es");
+      // If either is uncertain, mark uncertain (offline scenario)
+      verdict.uncertain = v1.uncertain || v2.uncertain;
+      verdict.ok = v1.ok || v2.ok || verdict.uncertain;
+    } else {
+      verdict = await dictCheck(raw, mode === "es" ? "es" : "en");
+      // allow anyway even if !ok
     }
 
+    // update badge (soft)
+    languageBadgeFromVerdict(verdict);
+
+    // reset
     state.inputWord = raw;
     state.generation = 1;
     state.used = new Set();
     state.lastBatch = [];
+    state.allResults = [];
     state.poolMeta = new Map();
     state.seedCursor = 0;
 
     displayWord.textContent = raw.toUpperCase();
-    setBadge("Dictionary ✓", "good");
-    setStatus("Running stack…");
+    setStatus(t("runningStack"));
 
     const { batch, novelty } = await runOneGeneration([raw]);
     state.lastBatch = batch;
+    state.allResults = [...batch];
 
     renderWordButtons(batch);
 
     cardsArea.innerHTML = "";
-    synthesisText.textContent = `"${raw.toUpperCase()}" ready. Tap any generated word to open its card.`;
+    synthesisText.textContent = t("readyTap", raw.toUpperCase());
 
     setStatus(`Generated ${batch.length} words • gen ${state.generation} • novelty ${novelty.toFixed(2)}`);
 
@@ -812,23 +1167,24 @@ function scrollToScorecard(){
     moreBtn.disabled = true;
 
     const seedWords = state.lastBatch.slice(0, 10).map(x=>x.word);
-    setStatus("Expanding outward…");
+    setStatus(t("expanding"));
 
     state.generation += 1;
     const { batch, novelty } = await runOneGeneration(seedWords);
 
     if(!batch.length || novelty < NOVELTY_MIN){
-      setStatus("Natural stop point reached: no new high-novelty patterns remain.");
+      setStatus(t("stopPoint"));
       moreBtn.disabled = true;
       state.running = false;
       return;
     }
 
     state.lastBatch = batch;
+    state.allResults = [...state.allResults, ...batch];
     renderWordButtons(batch);
 
     cardsArea.innerHTML = "";
-    synthesisText.textContent = `"${state.inputWord.toUpperCase()}" expanded. Tap a word to open its card.`;
+    synthesisText.textContent = t("expandedTap", state.inputWord.toUpperCase());
 
     setStatus(`Generated ${batch.length} words • gen ${state.generation} • novelty ${novelty.toFixed(2)}`);
 
@@ -841,16 +1197,17 @@ function scrollToScorecard(){
     state.generation = 0;
     state.used = new Set();
     state.lastBatch = [];
+    state.allResults = [];
     state.poolMeta = new Map();
     state.seedCursor = 0;
 
     displayWord.textContent = "—";
     wordListEl.innerHTML = "";
     cardsArea.innerHTML = "";
-    synthesisText.textContent = `"The engine identifies patterns. The human determines truth."`;
+    synthesisText.textContent = t("synthDefault");
 
-    setBadge("Awaiting input…");
-    setStatus("Cleared. Type a word and press Execute.");
+    setBadge(t("awaiting"));
+    setStatus(t("cleared"));
 
     moreBtn.disabled = true;
     saveBtn.disabled = true;
@@ -860,13 +1217,14 @@ function scrollToScorecard(){
   }
 
   function saveCurrent(){
-    if(!state.inputWord || !state.lastBatch.length) return;
+    if(!state.inputWord || !state.allResults.length) return;
 
     addRun({
       word: state.inputWord.toUpperCase(),
       createdAt: new Date().toISOString(),
       generation: state.generation,
-      results: state.lastBatch.map(x=>({
+      langMode: getLangMode(),
+      results: state.allResults.map(x=>({
         word: x.word,
         reasons: x.reasons.slice(0,2),
         score: x.score,
@@ -874,8 +1232,8 @@ function scrollToScorecard(){
       }))
     });
 
-    setStatus("Saved output to Notes.");
-    setTimeout(()=>setStatus(`Generated ${state.lastBatch.length} words • gen ${state.generation}`), 1200);
+    setStatus(t("saved"));
+    setTimeout(()=>setStatus(`Generated ${state.allResults.length} words • gen ${state.generation}`), 1200);
   }
 
   executeBtn.addEventListener("click", executeStack);
@@ -910,9 +1268,17 @@ function scrollToScorecard(){
   });
 
   // Boot
-  renderSavedRuns();
-  clearOutput();
-</script>
+  (function boot(){
+    // load persisted theme/lang
+    setTheme(getTheme());
+    const savedLang = localStorage.getItem(LANG_KEY) || "en";
+    langSelect.value = savedLang;
+    applyUiText();
 
+    renderSavedRuns();
+    clearOutput();
+  })();
+</script>
 </body>
 </html>
+```0
