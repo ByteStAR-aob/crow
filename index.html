@@ -77,7 +77,7 @@
 
     .dashboard {
       display: grid;
-      grid-template-columns: 300px 1fr;
+      grid-template-columns: 320px 1fr;
       flex: 1;
       overflow: hidden;
     }
@@ -144,6 +144,7 @@
     .tag.brand-thes { border-color: rgba(255,193,7,0.35);   color: rgba(255,220,130,0.95); }
     .tag.brand-ency { border-color: rgba(148,163,184,0.35); color: rgba(226,232,240,0.92); }
     .tag.brand-lens { border-color: rgba(124,58,237,0.35);  color: rgba(205,175,255,0.95); }
+    .tag.brand-rhyme{ border-color: rgba(56,189,248,0.35);  color: rgba(125,211,252,0.95); }
 
     body[data-theme="light"] .tag.brand-wiki { color: rgba(15,23,42,0.85); border-color: rgba(15,23,42,0.25); }
     body[data-theme="light"] .tag.brand-wikt { color: rgba(29,78,216,0.90); border-color: rgba(29,78,216,0.25); }
@@ -151,6 +152,7 @@
     body[data-theme="light"] .tag.brand-thes { color: rgba(161,98,7,0.95);  border-color: rgba(161,98,7,0.25); }
     body[data-theme="light"] .tag.brand-ency { color: rgba(71,85,105,0.95); border-color: rgba(71,85,105,0.25); }
     body[data-theme="light"] .tag.brand-lens { color: rgba(109,40,217,0.95); border-color: rgba(109,40,217,0.25); }
+    body[data-theme="light"] .tag.brand-rhyme{ color: rgba(3,105,161,0.95); border-color: rgba(3,105,161,0.25); }
 
     .search-container { display: flex; justify-content: center; margin-bottom: 1rem; }
     .search-wrapper {
@@ -344,6 +346,98 @@
       padding: 12px;
       background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), transparent);
     }
+
+    /* Notes search */
+    .notes-search {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--glass);
+      color: var(--text-main);
+      outline: none;
+      margin-bottom: 12px;
+      backdrop-filter: blur(10px);
+    }
+    .notes-search:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 18px var(--accent-glow);
+    }
+
+    /* Loading / Running Stack animation */
+    .status-loading {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      position: relative;
+      overflow: hidden;
+      animation: breathe 1.7s ease-in-out infinite;
+      box-shadow: 0 0 22px rgba(124, 58, 237, 0.18);
+    }
+    body[data-theme="light"] .status-loading{
+      background: rgba(2,6,23,0.03);
+      border-color: rgba(2,6,23,0.10);
+    }
+    .status-loading::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: linear-gradient(90deg,
+        rgba(34,197,94,0.30),
+        rgba(56,189,248,0.30),
+        rgba(124,58,237,0.30),
+        rgba(236,72,153,0.30),
+        rgba(255,193,7,0.30),
+        rgba(34,197,94,0.30)
+      );
+      filter: blur(10px);
+      opacity: 0.75;
+      animation: rainbow 2.2s linear infinite;
+      z-index: 0;
+    }
+    .status-loading > span{
+      position: relative;
+      z-index: 1;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+    }
+    @keyframes breathe{
+      0% { transform: translateY(0); box-shadow: 0 0 18px rgba(124,58,237,0.18); }
+      50% { transform: translateY(-1px); box-shadow: 0 0 30px rgba(124,58,237,0.30); }
+      100% { transform: translateY(0); box-shadow: 0 0 18px rgba(124,58,237,0.18); }
+    }
+    @keyframes rainbow{
+      0% { transform: translateX(-18%); }
+      100% { transform: translateX(18%); }
+    }
+
+    /* Inline mini form for restricted notice */
+    .inline-form{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .email-input{
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--glass);
+      color: var(--text-main);
+      outline:none;
+      min-width: 240px;
+      max-width: 360px;
+      width: 70%;
+      backdrop-filter: blur(10px);
+    }
+    .email-input:focus{
+      border-color: var(--accent);
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
   </style>
 </head>
 
@@ -374,17 +468,28 @@
 <main class="dashboard">
   <!-- NOTES -->
   <section id="notes-view" class="side-panel">
-    <h2 id="notesTitle">Saved Outputs</h2>
+    <h2 id="notesTitle">Notes</h2>
+
+    <input id="notesSearch" class="notes-search" placeholder="Search saved words…" autocomplete="off" />
 
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
         <div class="muted" style="font-size:0.9rem;" id="notesHint">
-          Tap a saved word to load it in the Hub.
+          Tap a saved item to load it in the Hub.
         </div>
-        <button class="btn secondary" id="clearSaved">Clear Saved</button>
+        <button class="btn secondary" id="clearSaved">Clear Outputs</button>
       </div>
-
       <div id="savedRuns" style="margin-top: 12px;"></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div class="muted" style="font-size:0.9rem;">
+          Saved scorecards (single words you liked).
+        </div>
+        <button class="btn secondary" id="clearSavedCards">Clear Cards</button>
+      </div>
+      <div id="savedCards" style="margin-top: 12px;"></div>
     </div>
   </section>
 
@@ -407,6 +512,20 @@
       <div class="mainLinksWrap" id="mainWordLinks" style="display:none;"></div>
 
       <p id="statusLine" class="muted" style="margin:10px 0 0;">Enter a word and press Execute.</p>
+
+      <div id="restrictedBlock" style="display:none; margin-top: 10px;">
+        <div class="muted" style="max-width: 760px; margin: 0 auto; line-height:1.6;">
+          <b style="color: var(--danger);">This term cannot be produced at this time.</b><br/>
+          World Words Hub is continuously evolving. If you want a heads-up when updates drop, leave your email.
+        </div>
+        <div class="inline-form">
+          <input id="emailInput" class="email-input" type="email" placeholder="you@example.com" />
+          <button class="btn" id="emailSaveBtn" type="button">Notify Me</button>
+        </div>
+        <div class="muted" id="emailSavedMsg" style="margin-top:8px; font-size:0.85rem; display:none;">
+          ✅ Saved locally for now (we’ll wire automation later).
+        </div>
+      </div>
 
       <div style="display:flex; gap:10px; justify-content:center; margin-top:14px; flex-wrap:wrap;">
         <button class="btn secondary" id="moreBtn" disabled>Generate More</button>
@@ -470,7 +589,9 @@
   const dictBadge   = $("dictBadge");
 
   const savedRunsEl = $("savedRuns");
+  const savedCardsEl = $("savedCards");
   const clearSavedBtn = $("clearSaved");
+  const clearSavedCardsBtn = $("clearSavedCards");
   const memoryPill  = $("memoryPill");
 
   const langSelect  = $("langSelect");
@@ -490,15 +611,24 @@
 
   const mainWordLinks = $("mainWordLinks");
 
+  const notesSearch = $("notesSearch");
+
+  const restrictedBlock = $("restrictedBlock");
+  const emailInput = $("emailInput");
+  const emailSaveBtn = $("emailSaveBtn");
+  const emailSavedMsg = $("emailSavedMsg");
+
   const PAGE_SIZE = 20;
   const NOVELTY_MIN = 0.20;
 
-  const MEM_KEY = "wwh_saved_runs_v1";
+  const MEM_KEY = "wwh_saved_runs_v2";
+  const MEM_CARDS_KEY = "wwh_saved_cards_v1";
+  const MEM_EMAILS_KEY = "wwh_emails_v1";
   const THEME_KEY = "wwh_theme_v1";
   const LANG_KEY  = "wwh_lang_v1";
 
   // --------------------
-  // i18n (UI only)
+  // i18n (UI only) (kept simple)
   // --------------------
   const I18N = {
     en: {
@@ -524,10 +654,13 @@
       expanding: "Expanding outward…",
       stopPoint: "Natural stop point reached: no new high-novelty patterns remain.",
       saved: "Saved output to Notes.",
+      savedCard: "Saved scorecard.",
       deletedOne: "Deleted one saved output.",
+      deletedCard: "Deleted one saved card.",
       clearedSaved: "Saved outputs cleared.",
-      notes: "Saved Outputs",
-      notesHint: "Tap a saved word to load it in the Hub.",
+      clearedCards: "Saved cards cleared.",
+      notes: "Notes",
+      notesHint: "Tap a saved item to load it in the Hub.",
       mobileNotes: "Notes",
       mobileHub: "Hub",
       footer: "A word is not just a word — it’s a container of patterns, sounds, and meanings.",
@@ -561,10 +694,13 @@
       expanding: "Expandiendo…",
       stopPoint: "Punto de parada: no quedan patrones nuevos con alta novedad.",
       saved: "Guardado en Notas.",
+      savedCard: "Tarjeta guardada.",
       deletedOne: "Se eliminó un guardado.",
+      deletedCard: "Se eliminó una tarjeta.",
       clearedSaved: "Guardados borrados.",
-      notes: "Guardados",
-      notesHint: "Toca una palabra guardada para cargarla en el Hub.",
+      clearedCards: "Tarjetas borradas.",
+      notes: "Notas",
+      notesHint: "Toca un guardado para cargarlo en el Hub.",
       mobileNotes: "Notas",
       mobileHub: "Hub",
       footer: "Una palabra no es solo una palabra — es un contenedor de patrones, sonidos y significados.",
@@ -579,7 +715,7 @@
 
   function getUiLang(){
     const v = langSelect.value;
-    return (v === "es") ? "es" : "en"; // keep UI English for collabs / DE
+    return (v === "es") ? "es" : "en";
   }
   function t(key, ...args){
     const L = I18N[getUiLang()] || I18N.en;
@@ -600,13 +736,13 @@
     seedCursor: 0,
     running: false,
 
-    // Scorecard & main-word link toggles (memory-only)
     activeCardItem: null,
     cardLinkLang: "en",
     mainLinkLang: "en",
 
-    // Lens toggle (per-card)
-    lensOpen: false
+    lensOpen: false,
+
+    restricted: false
   };
 
   function normalizeWord(s){
@@ -614,17 +750,97 @@
       .toLowerCase()
       .trim()
       .normalize("NFKD")
-      .replace(/[^a-z\u00C0-\u017FñÑáéíóúüÁÉÍÓÚÜß'-]/g,"");
+      .replace(/[^a-z\u00C0-\u017FñÑáéíóúüÁÉÍÓÚÜß'-\s]/g,"")
+      .replace(/\s+/g," ")
+      .trim();
   }
   function escapeHtml(s){
     return (s||"").replace(/[&<>"']/g, m => ({
       "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
     }[m]));
   }
-  function setStatus(msg){ statusLine.textContent = msg; }
+
   function setBadge(text, cls){
     dictBadge.className = "tag" + (cls ? " " + cls : "");
     dictBadge.textContent = text;
+  }
+
+  function setLoading(on){
+    if(on){
+      // wrap text inside span for glow overlay layering
+      statusLine.classList.add("status-loading");
+      if(!statusLine.querySelector("span")){
+        statusLine.innerHTML = `<span>${escapeHtml(statusLine.textContent || t("runningStack"))}</span>`;
+      }
+    }else{
+      statusLine.classList.remove("status-loading");
+      // unwrap
+      if(statusLine.querySelector("span")){
+        statusLine.textContent = statusLine.querySelector("span").textContent;
+      }
+    }
+  }
+
+  function setStatus(msg){
+    // If currently in loading mode, update inner span
+    if(statusLine.classList.contains("status-loading") && statusLine.querySelector("span")){
+      statusLine.querySelector("span").textContent = msg;
+    } else {
+      statusLine.textContent = msg;
+    }
+  }
+
+  // --------------------
+  // Guardrails (Simple)
+  // --------------------
+  // Phase 1: block generation for these topic signals (simple, not exhaustive)
+  const RESTRICTED_INPUT_ROOTS = [
+    // adult
+    "porn","porno","pornography","sex","sexual","xxx","erotic","nude","nudity",
+    // drugs
+    "cocaine","heroin","meth","methamphetamine","lsd","fentanyl","marijuana","weed","drug","drugs",
+    // crime / terror / violence
+    "terror","terrorism","bomb","extremism","weapon","gun","shoot","shooting","war","violence","violent",
+    "murder","kill","killing","robbery","assault","crime","criminal"
+  ];
+
+  // Always filtered from generated output (even when input is allowed)
+  const HARD_BLOCK_OUTPUT_ROOTS = [
+    // minors/exploitation
+    "underage","minor","child","children","groom","grooming","traffick","trafficking","exploit","exploitation",
+    // sexual assault / non-consensual
+    "rape","rapist","molest","molestation","incest","nonconsensual","non-consensual",
+    // extreme graphic harm actions (keep it minimal)
+    "behead","decapitat","dismember","mutilat"
+  ];
+
+  function tokenize(s){
+    return normalizeWord(s).split(" ").filter(Boolean);
+  }
+
+  function containsAnyRoot(text, roots){
+    const tokens = tokenize(text);
+    const joined = " " + tokens.join(" ") + " ";
+    // token-aware contains; also allow prefix match for inflections (e.g., exploit -> exploitation)
+    return roots.some(r => {
+      const rr = normalizeWord(r);
+      if(!rr) return false;
+      // exact token hit
+      if(joined.includes(" " + rr + " ")) return true;
+      // prefix hit (for inflections): any token starts with root
+      return tokens.some(tok => tok.startsWith(rr));
+    });
+  }
+
+  function isRestrictedInput(word){
+    return containsAnyRoot(word, RESTRICTED_INPUT_ROOTS);
+  }
+
+  function filterHardBlocked(batch){
+    return (batch || []).filter(item => {
+      const w = normalizeWord(item.word);
+      return !containsAnyRoot(w, HARD_BLOCK_OUTPUT_ROOTS);
+    });
   }
 
   // --------------------
@@ -665,9 +881,7 @@
 
     applyUiText();
 
-    // re-render main links if a word is active
     if(state.inputWord) renderMainWordLinks();
-    // re-render open card if any
     if(state.activeCardItem) openSingleCard(state.activeCardItem, { keepScroll:true });
   }
   langSelect.addEventListener("change", ()=> setLangMode(langSelect.value));
@@ -709,7 +923,7 @@
   }
   function saveRuns(runs){
     localStorage.setItem(MEM_KEY, JSON.stringify(runs.slice(0,200)));
-    renderSavedRuns();
+    renderAllNotes();
   }
   function addRun(run){
     const runs = loadRuns();
@@ -718,17 +932,52 @@
     runs.unshift(run);
     saveRuns(runs);
   }
+
+  // --------------------
+  // Memory (saved cards)
+  // --------------------
+  function loadCards(){
+    try { return JSON.parse(localStorage.getItem(MEM_CARDS_KEY)||"[]"); }
+    catch { return []; }
+  }
+  function saveCards(cards){
+    localStorage.setItem(MEM_CARDS_KEY, JSON.stringify(cards.slice(0,400)));
+    renderAllNotes();
+  }
+  function addCard(card){
+    const cards = loadCards();
+    const existingIdx = cards.findIndex(c => normalizeWord(c.word) === normalizeWord(card.word));
+    if(existingIdx >= 0) cards.splice(existingIdx, 1);
+    cards.unshift(card);
+    saveCards(cards);
+  }
+
+  function updateMemoryPill(){
+    const runs = loadRuns();
+    const cards = loadCards();
+    memoryPill.textContent = `🧠 Memory: ${runs.length} outputs • ${cards.length} cards`;
+  }
+
+  function getNotesFilter(){
+    return normalizeWord(notesSearch?.value || "");
+  }
+
   function renderSavedRuns(){
     const runs = loadRuns();
-    memoryPill.textContent = `🧠 Memory: ${runs.length} saved`;
+    const filter = getNotesFilter();
+    const filtered = filter ? runs.filter(r => normalizeWord(r.word).includes(filter)) : runs;
 
     if(!runs.length){
       savedRunsEl.innerHTML = `<div class="muted" style="padding:8px 0;">No saved outputs yet.</div>`;
       return;
     }
+    if(filter && !filtered.length){
+      savedRunsEl.innerHTML = `<div class="muted" style="padding:8px 0;">No matching outputs.</div>`;
+      return;
+    }
 
-    savedRunsEl.innerHTML = runs.slice(0,50).map((r, idx) => `
-      <div class="savedItem" data-load="${escapeHtml(r.word)}" data-idx="${idx}">
+    savedRunsEl.innerHTML = filtered.slice(0,60).map((r, idx) => `
+      <div class="savedItem" data-type="run" data-load="${escapeHtml(r.word)}" data-created="${escapeHtml(r.createdAt)}">
         <div>
           <div class="savedWord">${escapeHtml(r.word)}</div>
           <div class="savedMeta muted">gen ${r.generation || 1} • ${new Date(r.createdAt).toLocaleString()}</div>
@@ -736,7 +985,7 @@
         </div>
         <div style="display:flex; gap:8px; align-items:center;">
           <div class="tag">Open</div>
-          <div class="tag bad" data-del="${idx}" title="Delete this saved item">✕</div>
+          <div class="tag bad" data-delrun="${escapeHtml(r.createdAt)}" title="Delete this saved output">✕</div>
         </div>
       </div>
     `).join("");
@@ -750,12 +999,11 @@
       });
     });
 
-    [...savedRunsEl.querySelectorAll("[data-del]")].forEach(el=>{
+    [...savedRunsEl.querySelectorAll("[data-delrun]")].forEach(el=>{
       el.addEventListener("click", (e)=>{
         e.stopPropagation();
-        const idx = Number(el.getAttribute("data-del"));
-        const runs = loadRuns();
-        runs.splice(idx, 1);
+        const createdAt = el.getAttribute("data-delrun");
+        const runs = loadRuns().filter(r => r.createdAt !== createdAt);
         saveRuns(runs);
         setStatus(t("deletedOne"));
         setTimeout(()=>setStatus(""), 900);
@@ -763,17 +1011,112 @@
     });
   }
 
+  function renderSavedCards(){
+    const cards = loadCards();
+    const filter = getNotesFilter();
+    const filtered = filter ? cards.filter(c => normalizeWord(c.word).includes(filter) || normalizeWord(c.source || "").includes(filter)) : cards;
+
+    if(!cards.length){
+      savedCardsEl.innerHTML = `<div class="muted" style="padding:8px 0;">No saved cards yet.</div>`;
+      return;
+    }
+    if(filter && !filtered.length){
+      savedCardsEl.innerHTML = `<div class="muted" style="padding:8px 0;">No matching cards.</div>`;
+      return;
+    }
+
+    savedCardsEl.innerHTML = filtered.slice(0,80).map((c) => `
+      <div class="savedItem" data-type="card" data-cardword="${escapeHtml(c.word)}" data-created="${escapeHtml(c.createdAt)}">
+        <div>
+          <div class="savedWord">${escapeHtml((c.word||"").toUpperCase())}</div>
+          <div class="savedMeta muted">from: ${escapeHtml((c.source||"").toUpperCase() || "—")} • ${new Date(c.createdAt).toLocaleString()}</div>
+          <div class="savedMeta muted">score: ${Number(c.score||0).toFixed(2)} • mode: ${escapeHtml(c.langMode || "en")}</div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div class="tag">Open</div>
+          <div class="tag bad" data-delcard="${escapeHtml(c.createdAt)}" title="Delete this saved card">✕</div>
+        </div>
+      </div>
+    `).join("");
+
+    [...savedCardsEl.querySelectorAll("[data-cardword]")].forEach(el=>{
+      el.addEventListener("click", ()=>{
+        const w = el.getAttribute("data-cardword");
+        mainSearch.value = w;
+        executeStack();
+        showView("feed-view");
+      });
+    });
+
+    [...savedCardsEl.querySelectorAll("[data-delcard]")].forEach(el=>{
+      el.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        const createdAt = el.getAttribute("data-delcard");
+        const cards = loadCards().filter(c => c.createdAt !== createdAt);
+        saveCards(cards);
+        setStatus(t("deletedCard"));
+        setTimeout(()=>setStatus(""), 900);
+      });
+    });
+  }
+
+  function renderAllNotes(){
+    updateMemoryPill();
+    renderSavedRuns();
+    renderSavedCards();
+  }
+
+  notesSearch.addEventListener("input", ()=> renderAllNotes());
+
   clearSavedBtn.addEventListener("click", ()=>{
     localStorage.removeItem(MEM_KEY);
-    renderSavedRuns();
+    renderAllNotes();
     setStatus(t("clearedSaved"));
     setTimeout(()=>setStatus(""), 1200);
+  });
+
+  clearSavedCardsBtn.addEventListener("click", ()=>{
+    localStorage.removeItem(MEM_CARDS_KEY);
+    renderAllNotes();
+    setStatus(t("clearedCards"));
+    setTimeout(()=>setStatus(""), 1200);
+  });
+
+  // --------------------
+  // Emails (stored locally for now)
+  // --------------------
+  function loadEmails(){
+    try { return JSON.parse(localStorage.getItem(MEM_EMAILS_KEY)||"[]"); }
+    catch { return []; }
+  }
+  function saveEmail(email){
+    const e = (email || "").trim().toLowerCase();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return false;
+    const list = loadEmails();
+    if(!list.includes(e)) list.unshift(e);
+    localStorage.setItem(MEM_EMAILS_KEY, JSON.stringify(list.slice(0,500)));
+    return true;
+  }
+  emailSaveBtn.addEventListener("click", ()=>{
+    const ok = saveEmail(emailInput.value);
+    if(ok){
+      emailSavedMsg.style.display = "block";
+      setTimeout(()=> emailSavedMsg.style.display = "none", 2400);
+      emailInput.value = "";
+    }else{
+      emailSavedMsg.style.display = "block";
+      emailSavedMsg.textContent = "❌ Please enter a valid email.";
+      setTimeout(()=>{
+        emailSavedMsg.style.display = "none";
+        emailSavedMsg.textContent = "✅ Saved locally for now (we’ll wire automation later).";
+      }, 2200);
+    }
   });
 
   // --------------------
   // Dictionary validation (SOFT)
   // --------------------
-  const dictCache = new Map(); // key: lang|word -> { ok:boolean, uncertain:boolean }
+  const dictCache = new Map();
 
   async function dictCheck(word, lang){
     const w = normalizeWord(word);
@@ -787,7 +1130,7 @@
       dictCache.set(key, result);
       return result;
     }catch(e){
-      const result = { ok: true, uncertain: true }; // offline -> allow
+      const result = { ok: true, uncertain: true };
       dictCache.set(key, result);
       return result;
     }
@@ -809,12 +1152,22 @@
   }
 
   // --------------------
-  // Link Packs (language-aware)
+  // Link Packs (language-aware) + NEW ORDER + RHYME
   // --------------------
   function linkPackFor(lang, word){
     const w = word;
     const hl = (lang === "es") ? "es" : (lang === "de") ? "de" : "en";
     const gl = (lang === "es") ? "es" : (lang === "de") ? "de" : "us";
+
+    // Rhyme destinations (simple, reliable):
+    // - EN: RhymeZone direct query
+    // - ES/DE: Google query in that language (works everywhere)
+    const rhymeHref =
+      (lang === "en")
+        ? `https://www.rhymezone.com/r/rhyme.cgi?Word=${encodeURIComponent(w)}&typeofrhyme=perfect&org1=syl&org2=l&org3=y`
+        : (lang === "es")
+          ? `https://www.google.com/search?q=${encodeURIComponent("rimas de " + w)}&hl=es&gl=es`
+          : `https://www.google.com/search?q=${encodeURIComponent("Reime " + w)}&hl=de&gl=de`;
 
     if(lang === "es"){
       return {
@@ -829,7 +1182,9 @@
         thesLabel: "Sinónimos",
         thesHref: `https://www.google.com/search?q=${encodeURIComponent("sinónimos " + w)}&hl=es&gl=es`,
         ytHref: `https://www.youtube.com/results?search_query=${encodeURIComponent(w)}&hl=${hl}`,
-        webHref: `https://www.google.com/search?q=${encodeURIComponent(w)}&hl=${hl}&gl=${gl}`
+        webHref: `https://www.google.com/search?q=${encodeURIComponent(w)}&hl=${hl}&gl=${gl}`,
+        rhymeHref,
+        rhymeLabel: "Rhyme"
       };
     }
 
@@ -846,7 +1201,9 @@
         thesLabel: "Synonyme",
         thesHref: `https://www.openthesaurus.de/synonyme/${encodeURIComponent(w)}`,
         ytHref: `https://www.youtube.com/results?search_query=${encodeURIComponent(w)}&hl=${hl}`,
-        webHref: `https://www.google.com/search?q=${encodeURIComponent(w)}&hl=${hl}&gl=${gl}`
+        webHref: `https://www.google.com/search?q=${encodeURIComponent(w)}&hl=${hl}&gl=${gl}`,
+        rhymeHref,
+        rhymeLabel: "Reim"
       };
     }
 
@@ -862,20 +1219,30 @@
       thesLabel: "Thesaurus",
       thesHref: `https://www.thesaurus.com/browse/${encodeURIComponent(w)}`,
       ytHref: `https://www.youtube.com/results?search_query=${encodeURIComponent(w)}&hl=${hl}`,
-      webHref: `https://www.google.com/search?q=${encodeURIComponent(w)}&hl=${hl}&gl=${gl}`
+      webHref: `https://www.google.com/search?q=${encodeURIComponent(w)}&hl=${hl}&gl=${gl}`,
+      rhymeHref,
+      rhymeLabel: "Rhyme"
     };
   }
 
-  function buildLinksRowHTML(lang, word){
+  function buildLinksBlockHTML(lang, word){
     const pack = linkPackFor(lang, word);
+
+    // Row 1 (priority): Web + Rhyme + YouTube
+    // Row 2: Dictionary + Wikipedia + Wiktionary + Encyclopedia + Thesaurus
     return `
-      <a class="tag brand-dict" rel="noopener noreferrer" target="_blank" href="${pack.dictHref}">${pack.dictLabel}</a>
-      <a class="tag brand-wikt" rel="noopener noreferrer" target="_blank" href="${pack.wiktHref}">${pack.wiktLabel}</a>
-      <a class="tag brand-wiki" rel="noopener noreferrer" target="_blank" href="${pack.wikiHref}">${pack.wikiLabel}</a>
-      <a class="tag brand-ency" rel="noopener noreferrer" target="_blank" href="${pack.encyHref}">${pack.encyLabel}</a>
-      <a class="tag brand-thes" rel="noopener noreferrer" target="_blank" href="${pack.thesHref}">${pack.thesLabel}</a>
-      <a class="tag brand-yt"   rel="noopener noreferrer" target="_blank" href="${pack.ytHref}">YouTube</a>
-      <a class="tag brand-web"  rel="noopener noreferrer" target="_blank" href="${pack.webHref}">Web</a>
+      <div class="tag-row" style="margin-top:10px;">
+        <a class="tag brand-web"  rel="noopener noreferrer" target="_blank" href="${pack.webHref}">Web</a>
+        <a class="tag brand-rhyme" rel="noopener noreferrer" target="_blank" href="${pack.rhymeHref}">${pack.rhymeLabel}</a>
+        <a class="tag brand-yt"   rel="noopener noreferrer" target="_blank" href="${pack.ytHref}">YouTube</a>
+      </div>
+      <div class="tag-row" style="margin-top:10px;">
+        <a class="tag brand-dict" rel="noopener noreferrer" target="_blank" href="${pack.dictHref}">${pack.dictLabel}</a>
+        <a class="tag brand-wiki" rel="noopener noreferrer" target="_blank" href="${pack.wikiHref}">${pack.wikiLabel}</a>
+        <a class="tag brand-wikt" rel="noopener noreferrer" target="_blank" href="${pack.wiktHref}">${pack.wiktLabel}</a>
+        <a class="tag brand-ency" rel="noopener noreferrer" target="_blank" href="${pack.encyHref}">${pack.encyLabel}</a>
+        <a class="tag brand-thes" rel="noopener noreferrer" target="_blank" href="${pack.thesHref}">${pack.thesLabel}</a>
+      </div>
     `;
   }
 
@@ -898,8 +1265,8 @@
 
     mainWordLinks.innerHTML = `
       ${toggleBtn}
-      <div class="tag-row" style="justify-content:center; margin-top:0;">
-        ${buildLinksRowHTML(lang, normalizeWord(state.inputWord))}
+      <div style="width:100%; max-width: 860px;">
+        ${buildLinksBlockHTML(lang, normalizeWord(state.inputWord))}
       </div>
     `;
 
@@ -1009,7 +1376,6 @@
   }
 
   function datamuseParamsForLayer(L, cleanSeed, vocab){
-    // Datamuse supports v=es; German best-effort via v=enwiki
     const v = (vocab === "es") ? "&v=es" : (vocab === "enwiki") ? "&v=enwiki" : "";
     if(L.type === "sl"){
       return `sl=${encodeURIComponent(cleanSeed)}&max=18${v}`;
@@ -1160,10 +1526,7 @@
   };
 
   function extractPatternName(reasonLine){
-    // reasonLine begins like: "Phonetic drift: ..."
     const raw = (reasonLine || "").split(":")[0].trim();
-    // normalize capitalization to match keys
-    // handle "Phonetic drift" -> "Phonetic Drift"
     return raw
       .split(" ")
       .map(x => x ? (x[0].toUpperCase() + x.slice(1).toLowerCase()) : x)
@@ -1171,7 +1534,6 @@
   }
 
   function extractSeed(reasonLine){
-    // tries to read: from "SEED" toward "WORD"
     const m = (reasonLine || "").match(/from\s+"([^"]+)"/i);
     return m ? m[1] : state.inputWord;
   }
@@ -1209,6 +1571,10 @@
             </button>
           ` : ""}
 
+          <button class="pill-btn" data-save-card title="Save this scorecard">
+            💾 Save Card
+          </button>
+
           <div class="muted" style="font-size:0.8rem; font-weight:900;">
             SCORE: ${item.score.toFixed(2)}
           </div>
@@ -1238,9 +1604,7 @@
 
       ${anchorLine(item)}
 
-      <div class="tag-row">
-        ${buildLinksRowHTML(linkLang || "en", item.word)}
-      </div>
+      ${buildLinksBlockHTML(linkLang || "en", item.word)}
     `;
 
     const toggleLangBtn = div.querySelector("[data-toggle-linklang]");
@@ -1258,6 +1622,27 @@
       lensBtn.addEventListener("click", ()=>{
         state.lensOpen = !state.lensOpen;
         openSingleCard(item, { keepScroll:true });
+      });
+    }
+
+    const saveCardBtn = div.querySelector("[data-save-card]");
+    if(saveCardBtn){
+      saveCardBtn.addEventListener("click", ()=>{
+        addCard({
+          word: item.word,
+          createdAt: new Date().toISOString(),
+          source: state.inputWord || "",
+          score: item.score,
+          reason: reasonLine,
+          langMode: getLangMode(),
+          linkLang: (linkLang || "en")
+        });
+        setStatus(t("savedCard"));
+        setTimeout(()=>{
+          if(state.allResults.length){
+            setStatus(`Generated ${state.allResults.length} words • gen ${state.generation}`);
+          }
+        }, 900);
       });
     }
 
@@ -1300,7 +1685,7 @@
       btn.textContent = item.word;
       btn.title = "Click to open";
       btn.addEventListener("click", ()=> {
-        state.lensOpen = false; // default collapsed each selection
+        state.lensOpen = false;
         openSingleCard(item);
       });
       wordListEl.appendChild(btn);
@@ -1310,6 +1695,15 @@
   // --------------------
   // Execute / More / Clear
   // --------------------
+  function setRestrictedUI(on){
+    state.restricted = on;
+    restrictedBlock.style.display = on ? "block" : "none";
+    if(!on){
+      emailSavedMsg.style.display = "none";
+      emailInput.value = "";
+    }
+  }
+
   async function executeStack(){
     if(state.running) return;
     const raw = mainSearch.value.trim();
@@ -1320,8 +1714,34 @@
     moreBtn.disabled = true;
     saveBtn.disabled = true;
 
+    setRestrictedUI(false);
+
     setBadge(t("checkingDict"));
     setStatus(t("validating"));
+
+    // Restrict generation on input categories (simple phase)
+    if(isRestrictedInput(raw)){
+      // UI only: show block + email capture
+      state.inputWord = raw;
+      displayWord.textContent = raw.toUpperCase();
+      mainWordLinks.style.display = "none";
+      mainWordLinks.innerHTML = "";
+
+      wordListEl.innerHTML = "";
+      cardsArea.innerHTML = "";
+
+      setBadge("Restricted", "bad");
+      setStatus("This term cannot be produced at this time.");
+      synthesisText.textContent = t("synthDefault");
+
+      setRestrictedUI(true);
+
+      state.running = false;
+      executeBtn.disabled = false;
+      moreBtn.disabled = true;
+      saveBtn.disabled = true;
+      return;
+    }
 
     const mode = getLangMode();
     let verdict = { ok:false, uncertain:false };
@@ -1370,9 +1790,15 @@
     displayWord.textContent = raw.toUpperCase();
     renderMainWordLinks();
 
+    // Running animation ON
     setStatus(t("runningStack"));
+    setLoading(true);
 
-    const { batch, novelty } = await runOneGeneration([raw]);
+    let { batch, novelty } = await runOneGeneration([raw]);
+
+    // Output hard filter (no unacceptable drift)
+    batch = filterHardBlocked(batch);
+
     state.lastBatch = batch;
     state.allResults = [...batch];
 
@@ -1380,6 +1806,9 @@
 
     cardsArea.innerHTML = "";
     synthesisText.textContent = t("readyTap", raw.toUpperCase());
+
+    // Running animation OFF
+    setLoading(false);
 
     setStatus(`Generated ${batch.length} words • gen ${state.generation} • novelty ${novelty.toFixed(2)}`);
 
@@ -1397,12 +1826,17 @@
     moreBtn.disabled = true;
 
     const seedWords = state.lastBatch.slice(0, 10).map(x=>x.word);
+
     setStatus(t("expanding"));
+    setLoading(true);
 
     state.generation += 1;
-    const { batch, novelty } = await runOneGeneration(seedWords);
+    let { batch, novelty } = await runOneGeneration(seedWords);
+
+    batch = filterHardBlocked(batch);
 
     if(!batch.length || novelty < NOVELTY_MIN){
+      setLoading(false);
       setStatus(t("stopPoint"));
       moreBtn.disabled = true;
       state.running = false;
@@ -1416,6 +1850,7 @@
     cardsArea.innerHTML = "";
     synthesisText.textContent = t("expandedTap", state.inputWord.toUpperCase());
 
+    setLoading(false);
     setStatus(`Generated ${batch.length} words • gen ${state.generation} • novelty ${novelty.toFixed(2)}`);
 
     moreBtn.disabled = false;
@@ -1441,8 +1876,11 @@
     mainWordLinks.style.display = "none";
     mainWordLinks.innerHTML = "";
 
+    setRestrictedUI(false);
+
     setBadge(t("awaiting"));
     setStatus(t("cleared"));
+    setLoading(false);
 
     moreBtn.disabled = true;
     saveBtn.disabled = true;
@@ -1511,7 +1949,7 @@
     langSelect.value = savedLang;
 
     applyUiText();
-    renderSavedRuns();
+    renderAllNotes();
     clearOutput();
   })();
 </script>
