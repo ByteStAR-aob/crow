@@ -5,23 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>World Words Hub — Pattern Stacking Engine.</title>
 
-  <!-- Optional: CSP (safe, doesn't change UI). Uncomment when you want.
-  <meta http-equiv="Content-Security-Policy"
-  content="
-  default-src 'self';
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-  font-src https://fonts.gstatic.com;
-  script-src 'self' 'unsafe-inline';
-  connect-src https://api.datamuse.com https://api.dictionaryapi.dev;
-  img-src 'self' data:;
-  base-uri 'self';
-  frame-ancestors 'none';
-  ">
-  -->
-
   <style>
     :root {
-      /* Dark theme (default) */
       --bg: #070b14;
       --panel: #0f172a;
       --accent: #7c3aed;
@@ -35,7 +20,6 @@
       --shadow: rgba(0,0,0,0.28);
     }
 
-    /* Light theme overrides */
     body[data-theme="light"]{
       --bg: #f6f7fb;
       --panel: #ffffff;
@@ -142,6 +126,7 @@
       cursor: pointer;
       display:inline-block;
       transition: 0.15s;
+      white-space: nowrap;
     }
     body[data-theme="light"] .tag{
       background: rgba(2, 6, 23, 0.03);
@@ -156,16 +141,18 @@
     .tag.brand-wikt { border-color: rgba(90,160,255,0.35);  color: rgba(170,210,255,0.95); }
     .tag.brand-dict { border-color: rgba(124,58,237,0.55);  color: rgba(205,175,255,0.95); }
     .tag.brand-web  { border-color: rgba(34,197,94,0.35);   color: rgba(34,197,94,0.95); }
+    .tag.brand-thes { border-color: rgba(255,193,7,0.35);   color: rgba(255,220,130,0.95); }
+    .tag.brand-ency { border-color: rgba(148,163,184,0.35); color: rgba(226,232,240,0.92); }
+    .tag.brand-lens { border-color: rgba(124,58,237,0.35);  color: rgba(205,175,255,0.95); }
 
     body[data-theme="light"] .tag.brand-wiki { color: rgba(15,23,42,0.85); border-color: rgba(15,23,42,0.25); }
     body[data-theme="light"] .tag.brand-wikt { color: rgba(29,78,216,0.90); border-color: rgba(29,78,216,0.25); }
     body[data-theme="light"] .tag.brand-dict { color: rgba(109,40,217,0.95); border-color: rgba(109,40,217,0.35); }
+    body[data-theme="light"] .tag.brand-thes { color: rgba(161,98,7,0.95);  border-color: rgba(161,98,7,0.25); }
+    body[data-theme="light"] .tag.brand-ency { color: rgba(71,85,105,0.95); border-color: rgba(71,85,105,0.25); }
+    body[data-theme="light"] .tag.brand-lens { color: rgba(109,40,217,0.95); border-color: rgba(109,40,217,0.25); }
 
-    .search-container {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 1rem;
-    }
+    .search-container { display: flex; justify-content: center; margin-bottom: 1rem; }
     .search-wrapper {
       display: flex;
       align-items: center;
@@ -212,12 +199,8 @@
       color: var(--text-main);
       font-weight: 800;
     }
-    .btn:disabled{
-      opacity:0.55;
-      cursor:not-allowed;
-    }
+    .btn:disabled{ opacity:0.55; cursor:not-allowed; }
 
-    /* Small icon-ish buttons */
     .pill-btn{
       background: transparent;
       border: 1px solid var(--border);
@@ -233,6 +216,7 @@
       gap:8px;
       transition: 0.15s;
       user-select:none;
+      white-space: nowrap;
     }
     .pill-btn:hover{
       border-color: rgba(124,58,237,0.45);
@@ -254,10 +238,7 @@
       cursor: pointer;
       position: relative;
     }
-    .select-wrap{
-      position: relative;
-      display:inline-block;
-    }
+    .select-wrap{ position: relative; display:inline-block; }
     .select-wrap:after{
       content:"▾";
       position:absolute;
@@ -295,11 +276,7 @@
       section { border-right: none; }
     }
 
-    /* Hub output */
-    .wordHero{
-      text-align:center;
-      margin-bottom: 1rem;
-    }
+    .wordHero{ text-align:center; margin-bottom: 1rem; }
     .wordHero h1{
       font-size: 3.0rem;
       margin:0;
@@ -333,13 +310,8 @@
     body[data-theme="light"] .wordBtn{ background: rgba(2,6,23,0.03); }
     .wordBtn:hover{ border-color: rgba(124,58,237,0.55); transform: translateY(-1px); }
 
-    .divider{
-      margin: 18px 0;
-      height: 1px;
-      background: var(--border);
-    }
+    .divider{ margin: 18px 0; height: 1px; background: var(--border); }
 
-    /* Notes list items */
     .savedItem{
       padding: 12px 4px;
       border-bottom: 1px solid var(--border);
@@ -354,11 +326,23 @@
     .savedWord{ font-weight: 1000; letter-spacing: 1px; }
     .savedMeta{ font-size: 0.8rem; opacity: 0.65; }
 
-    .tiny-divider{
-      height: 1px;
-      width: 100%;
-      background: var(--border);
-      margin: 8px 0;
+    /* Main-word links row (compact) */
+    .mainLinksWrap{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 12px;
+    }
+
+    /* Collapsible Lens box */
+    .lensBox{
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), transparent);
     }
   </style>
 </head>
@@ -371,16 +355,16 @@
   </div>
 
   <div class="header-right">
-    <!-- Language dropdown -->
     <div class="select-wrap" title="Language">
       <select class="select" id="langSelect" aria-label="Language">
         <option value="en">EN</option>
         <option value="es">ES</option>
         <option value="mix">EN + ES</option>
+        <option value="de">DE</option>
+        <option value="en_de">EN + DE</option>
       </select>
     </div>
 
-    <!-- Theme toggle -->
     <button class="pill-btn" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">🌙 Dark</button>
 
     <div class="memory-pill" id="memoryPill">🧠 Memory: 0 saved</div>
@@ -419,6 +403,9 @@
         Results for:
       </p>
       <h1 id="displayWord">—</h1>
+
+      <div class="mainLinksWrap" id="mainWordLinks" style="display:none;"></div>
+
       <p id="statusLine" class="muted" style="margin:10px 0 0;">Enter a word and press Execute.</p>
 
       <div style="display:flex; gap:10px; justify-content:center; margin-top:14px; flex-wrap:wrap;">
@@ -440,7 +427,6 @@
 
       <div class="divider"></div>
 
-      <!-- SINGLE SELECTED CARD AREA -->
       <div id="cardsArea" style="margin-top:12px;"></div>
     </div>
 
@@ -502,15 +488,17 @@
   const mobileNotes = $("mobileNotes");
   const mobileHub   = $("mobileHub");
 
+  const mainWordLinks = $("mainWordLinks");
+
   const PAGE_SIZE = 20;
   const NOVELTY_MIN = 0.20;
 
   const MEM_KEY = "wwh_saved_runs_v1";
   const THEME_KEY = "wwh_theme_v1";
-  const LANG_KEY = "wwh_lang_v1";
+  const LANG_KEY  = "wwh_lang_v1";
 
   // --------------------
-  // i18n strings
+  // i18n (UI only)
   // --------------------
   const I18N = {
     en: {
@@ -590,15 +578,103 @@
   };
 
   function getUiLang(){
-    // UI language follows dropdown unless merge selected, then keep English UI (simple + consistent)
     const v = langSelect.value;
-    return (v === "es") ? "es" : "en";
+    return (v === "es") ? "es" : "en"; // keep UI English for collabs / DE
   }
   function t(key, ...args){
     const L = I18N[getUiLang()] || I18N.en;
     const val = L[key];
     return (typeof val === "function") ? val(...args) : val;
   }
+
+  // --------------------
+  // State
+  // --------------------
+  let state = {
+    inputWord: "",
+    generation: 0,
+    used: new Set(),
+    lastBatch: [],
+    allResults: [],
+    poolMeta: new Map(),
+    seedCursor: 0,
+    running: false,
+
+    // Scorecard & main-word link toggles (memory-only)
+    activeCardItem: null,
+    cardLinkLang: "en",
+    mainLinkLang: "en",
+
+    // Lens toggle (per-card)
+    lensOpen: false
+  };
+
+  function normalizeWord(s){
+    return (s||"")
+      .toLowerCase()
+      .trim()
+      .normalize("NFKD")
+      .replace(/[^a-z\u00C0-\u017FñÑáéíóúüÁÉÍÓÚÜß'-]/g,"");
+  }
+  function escapeHtml(s){
+    return (s||"").replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+  }
+  function setStatus(msg){ statusLine.textContent = msg; }
+  function setBadge(text, cls){
+    dictBadge.className = "tag" + (cls ? " " + cls : "");
+    dictBadge.textContent = text;
+  }
+
+  // --------------------
+  // Theme
+  // --------------------
+  function getTheme(){ return localStorage.getItem(THEME_KEY) || "dark"; }
+  function setTheme(theme){
+    document.body.setAttribute("data-theme", theme);
+    localStorage.setItem(THEME_KEY, theme);
+    refreshThemeToggleLabel();
+  }
+  function refreshThemeToggleLabel(){
+    const theme = document.body.getAttribute("data-theme") || "dark";
+    themeToggle.textContent = (theme === "light") ? t("themeLight") : t("themeDark");
+  }
+  themeToggle.addEventListener("click", ()=>{
+    const cur = document.body.getAttribute("data-theme") || "dark";
+    setTheme(cur === "dark" ? "light" : "dark");
+  });
+
+  // --------------------
+  // Language mode
+  // --------------------
+  function getLangMode(){ return langSelect.value || "en"; }
+  function getCollabPair(){
+    const mode = getLangMode();
+    if(mode === "mix")   return { a:"en", b:"es", labelA:"EN", labelB:"ES" };
+    if(mode === "en_de") return { a:"en", b:"de", labelA:"EN", labelB:"DE" };
+    return null;
+  }
+  function setLangMode(v){
+    langSelect.value = v;
+    localStorage.setItem(LANG_KEY, v);
+
+    const pair = getCollabPair();
+    state.cardLinkLang = pair ? pair.a : (v === "es" ? "es" : v === "de" ? "de" : "en");
+    state.mainLinkLang = state.cardLinkLang;
+
+    applyUiText();
+
+    // re-render main links if a word is active
+    if(state.inputWord) renderMainWordLinks();
+    // re-render open card if any
+    if(state.activeCardItem) openSingleCard(state.activeCardItem, { keepScroll:true });
+  }
+  langSelect.addEventListener("change", ()=> setLangMode(langSelect.value));
+
+  // --------------------
+  // UI text apply
+  // --------------------
   function applyUiText(){
     subtitleLine.textContent = t("subtitle");
     mainSearch.placeholder   = t("placeholder");
@@ -616,89 +692,13 @@
     mobileNotes.textContent = t("mobileNotes");
     mobileHub.textContent   = t("mobileHub");
 
-    // If we're in idle state, refresh default messages
     if(!state.inputWord){
       setBadge(t("awaiting"));
       setStatus(t("enterAndExecute"));
       synthesisText.textContent = t("synthDefault");
     }
-    // Theme label
     refreshThemeToggleLabel();
   }
-
-  // --------------------
-  // State
-  // --------------------
-  let state = {
-    inputWord: "",
-    generation: 0,
-    used: new Set(),
-    lastBatch: [],
-    allResults: [],      // NEW: accumulate across generations (Save = whole session)
-    poolMeta: new Map(),
-    seedCursor: 0,
-    running: false,
-  };
-
-  function normalizeWord(s){
-    return (s||"")
-      .toLowerCase()
-      .trim()
-      .normalize("NFKD")
-      .replace(/[^a-z\u00C0-\u017FñÑáéíóúüÁÉÍÓÚÜ'-]/g,""); // allow basic Spanish letters too
-  }
-
-  function escapeHtml(s){
-    return (s||"").replace(/[&<>"']/g, m => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-    }[m]));
-  }
-
-  function setStatus(msg){ statusLine.textContent = msg; }
-  function setBadge(text, cls){
-    dictBadge.className = "tag" + (cls ? " " + cls : "");
-    dictBadge.textContent = text;
-  }
-
-  // --------------------
-  // Theme
-  // --------------------
-  function getTheme(){
-    return localStorage.getItem(THEME_KEY) || "dark";
-  }
-  function setTheme(theme){
-    document.body.setAttribute("data-theme", theme);
-    localStorage.setItem(THEME_KEY, theme);
-    refreshThemeToggleLabel();
-  }
-  function refreshThemeToggleLabel(){
-    const theme = document.body.getAttribute("data-theme") || "dark";
-    themeToggle.textContent = (theme === "light") ? t("themeLight") : t("themeDark");
-  }
-  themeToggle.addEventListener("click", ()=>{
-    const cur = document.body.getAttribute("data-theme") || "dark";
-    setTheme(cur === "dark" ? "light" : "dark");
-  });
-
-  // --------------------
-  // Language
-  // --------------------
-  function getLangMode(){
-    // en / es / mix
-    return langSelect.value || "en";
-  }
-  function setLangMode(v){
-    langSelect.value = v;
-    localStorage.setItem(LANG_KEY, v);
-    applyUiText();
-    // Update badge if an active word is loaded
-    if(state.inputWord){
-      // keep current badge as-is; next run will reflect language mode
-    }
-  }
-  langSelect.addEventListener("change", ()=>{
-    setLangMode(langSelect.value);
-  });
 
   // --------------------
   // Memory (saved runs)
@@ -718,7 +718,6 @@
     runs.unshift(run);
     saveRuns(runs);
   }
-
   function renderSavedRuns(){
     const runs = loadRuns();
     memoryPill.textContent = `🧠 Memory: ${runs.length} saved`;
@@ -742,7 +741,6 @@
       </div>
     `).join("");
 
-    // open saved
     [...savedRunsEl.querySelectorAll("[data-load]")].forEach(el=>{
       el.addEventListener("click", ()=>{
         const w = el.getAttribute("data-load");
@@ -752,7 +750,6 @@
       });
     });
 
-    // delete one
     [...savedRunsEl.querySelectorAll("[data-del]")].forEach(el=>{
       el.addEventListener("click", (e)=>{
         e.stopPropagation();
@@ -776,8 +773,6 @@
   // --------------------
   // Dictionary validation (SOFT)
   // --------------------
-  // dictionaryapi.dev language codes: en, es, etc.
-  // We'll run a check but NEVER block. We'll only badge it.
   const dictCache = new Map(); // key: lang|word -> { ok:boolean, uncertain:boolean }
 
   async function dictCheck(word, lang){
@@ -809,9 +804,114 @@
       dictBadge.title = "";
       return;
     }
-    // Not verified, but allowed
     setBadge(t("badgeDictSoftOk"), "bad");
     dictBadge.title = t("wordNotVerifiedTitle");
+  }
+
+  // --------------------
+  // Link Packs (language-aware)
+  // --------------------
+  function linkPackFor(lang, word){
+    const w = word;
+    const hl = (lang === "es") ? "es" : (lang === "de") ? "de" : "en";
+    const gl = (lang === "es") ? "es" : (lang === "de") ? "de" : "us";
+
+    if(lang === "es"){
+      return {
+        dictLabel: "RAE",
+        dictHref: `https://dle.rae.es/${encodeURIComponent(w)}`,
+        wiktLabel: "Wikcionario",
+        wiktHref: `https://es.wiktionary.org/wiki/${encodeURIComponent(w)}`,
+        wikiLabel: "Wikipedia",
+        wikiHref: `https://es.wikipedia.org/w/index.php?search=${encodeURIComponent(w)}`,
+        encyLabel: "Encyclopedia",
+        encyHref: `https://www.encyclopedia.com/gsearch?query=${encodeURIComponent(w)}`,
+        thesLabel: "Sinónimos",
+        thesHref: `https://www.google.com/search?q=${encodeURIComponent("sinónimos " + w)}&hl=es&gl=es`,
+        ytHref: `https://www.youtube.com/results?search_query=${encodeURIComponent(w)}&hl=${hl}`,
+        webHref: `https://www.google.com/search?q=${encodeURIComponent(w)}&hl=${hl}&gl=${gl}`
+      };
+    }
+
+    if(lang === "de"){
+      return {
+        dictLabel: "Duden",
+        dictHref: `https://www.duden.de/suchen/dudenonline/${encodeURIComponent(w)}`,
+        wiktLabel: "Wiktionary",
+        wiktHref: `https://de.wiktionary.org/wiki/${encodeURIComponent(w)}`,
+        wikiLabel: "Wikipedia",
+        wikiHref: `https://de.wikipedia.org/w/index.php?search=${encodeURIComponent(w)}`,
+        encyLabel: "Encyclopedia",
+        encyHref: `https://www.encyclopedia.com/gsearch?query=${encodeURIComponent(w)}`,
+        thesLabel: "Synonyme",
+        thesHref: `https://www.openthesaurus.de/synonyme/${encodeURIComponent(w)}`,
+        ytHref: `https://www.youtube.com/results?search_query=${encodeURIComponent(w)}&hl=${hl}`,
+        webHref: `https://www.google.com/search?q=${encodeURIComponent(w)}&hl=${hl}&gl=${gl}`
+      };
+    }
+
+    return {
+      dictLabel: "Dictionary.com",
+      dictHref: `https://www.dictionary.com/browse/${encodeURIComponent(w)}`,
+      wiktLabel: "Wiktionary (exact)",
+      wiktHref: `https://en.wiktionary.org/wiki/${encodeURIComponent(w)}`,
+      wikiLabel: "Wikipedia",
+      wikiHref: `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(w)}`,
+      encyLabel: "Encyclopedia",
+      encyHref: `https://www.encyclopedia.com/gsearch?query=${encodeURIComponent(w)}`,
+      thesLabel: "Thesaurus",
+      thesHref: `https://www.thesaurus.com/browse/${encodeURIComponent(w)}`,
+      ytHref: `https://www.youtube.com/results?search_query=${encodeURIComponent(w)}&hl=${hl}`,
+      webHref: `https://www.google.com/search?q=${encodeURIComponent(w)}&hl=${hl}&gl=${gl}`
+    };
+  }
+
+  function buildLinksRowHTML(lang, word){
+    const pack = linkPackFor(lang, word);
+    return `
+      <a class="tag brand-dict" rel="noopener noreferrer" target="_blank" href="${pack.dictHref}">${pack.dictLabel}</a>
+      <a class="tag brand-wikt" rel="noopener noreferrer" target="_blank" href="${pack.wiktHref}">${pack.wiktLabel}</a>
+      <a class="tag brand-wiki" rel="noopener noreferrer" target="_blank" href="${pack.wikiHref}">${pack.wikiLabel}</a>
+      <a class="tag brand-ency" rel="noopener noreferrer" target="_blank" href="${pack.encyHref}">${pack.encyLabel}</a>
+      <a class="tag brand-thes" rel="noopener noreferrer" target="_blank" href="${pack.thesHref}">${pack.thesLabel}</a>
+      <a class="tag brand-yt"   rel="noopener noreferrer" target="_blank" href="${pack.ytHref}">YouTube</a>
+      <a class="tag brand-web"  rel="noopener noreferrer" target="_blank" href="${pack.webHref}">Web</a>
+    `;
+  }
+
+  function renderMainWordLinks(){
+    if(!state.inputWord){
+      mainWordLinks.style.display = "none";
+      mainWordLinks.innerHTML = "";
+      return;
+    }
+
+    const pair = getCollabPair();
+    const showToggle = !!pair;
+    const lang = showToggle ? (state.mainLinkLang || pair.a) : state.mainLinkLang;
+
+    mainWordLinks.style.display = "flex";
+
+    const toggleBtn = showToggle
+      ? `<button class="pill-btn" id="mainLinkToggle" title="Toggle main word link sources">${pair.labelA} ↔ ${pair.labelB} • ${lang.toUpperCase()}</button>`
+      : "";
+
+    mainWordLinks.innerHTML = `
+      ${toggleBtn}
+      <div class="tag-row" style="justify-content:center; margin-top:0;">
+        ${buildLinksRowHTML(lang, normalizeWord(state.inputWord))}
+      </div>
+    `;
+
+    const btn = $("mainLinkToggle");
+    if(btn){
+      btn.addEventListener("click", ()=>{
+        const p = getCollabPair();
+        if(!p) return;
+        state.mainLinkLang = (state.mainLinkLang === p.a) ? p.b : p.a;
+        renderMainWordLinks();
+      });
+    }
   }
 
   // --------------------
@@ -827,14 +927,14 @@
   function layerReasons(){
     return [
       { layer:"Apophenia", type:"mix", reason:(seed, w)=>`Apophenia: loose association from "${seed}" toward "${w}".` },
-      { layer:"Phonosemantic", type:"sl", reason:(seed, w)=>`Phonosemantic: pronunciation / syllable sound from "${seed}" toward "${w}".` },
+      { layer:"Phonosemantic", type:"sl",  reason:(seed, w)=>`Phonosemantic: pronunciation / syllable sound from "${seed}" toward "${w}".` },
       { layer:"Phonetic Drift", type:"sl", reason:(seed, w)=>`Phonetic drift: sound-slide from "${seed}" toward "${w}".` },
-      { layer:"Semiotic", type:"sp", reason:(seed, w)=>`Semiotic: glyph/shape pattern from "${seed}" toward "${w}".` },
-      { layer:"Morphological", type:"sp", reason:(seed, w)=>`Morphological: structural reanalysis from "${seed}" toward "${w}".` },
-      { layer:"Metaphorical", type:"ml", reason:(seed, w)=>`Metaphorical: meaning adjacency from "${seed}" toward "${w}".` },
-      { layer:"Symbolic", type:"ml", reason:(seed, w)=>`Symbolic: archetypal association from "${seed}" toward "${w}".` },
-      { layer:"Associative", type:"ml", reason:(seed, w)=>`Associative: spreading activation from "${seed}" toward "${w}".` },
-      { layer:"Predictive", type:"ml", reason:(seed, w)=>`Predictive: narrative completion from "${seed}" toward "${w}".` },
+      { layer:"Semiotic", type:"sp",       reason:(seed, w)=>`Semiotic: glyph/shape pattern from "${seed}" toward "${w}".` },
+      { layer:"Morphological", type:"sp",  reason:(seed, w)=>`Morphological: structural reanalysis from "${seed}" toward "${w}".` },
+      { layer:"Metaphorical", type:"ml",   reason:(seed, w)=>`Metaphorical: meaning adjacency from "${seed}" toward "${w}".` },
+      { layer:"Symbolic", type:"ml",       reason:(seed, w)=>`Symbolic: archetypal association from "${seed}" toward "${w}".` },
+      { layer:"Associative", type:"ml",    reason:(seed, w)=>`Associative: spreading activation from "${seed}" toward "${w}".` },
+      { layer:"Predictive", type:"ml",     reason:(seed, w)=>`Predictive: narrative completion from "${seed}" toward "${w}".` },
     ];
   }
 
@@ -909,8 +1009,8 @@
   }
 
   function datamuseParamsForLayer(L, cleanSeed, vocab){
-    // vocab: "en" | "es"
-    const v = vocab === "es" ? "&v=es" : ""; // Datamuse supports v=es for Spanish vocabulary
+    // Datamuse supports v=es; German best-effort via v=enwiki
+    const v = (vocab === "es") ? "&v=es" : (vocab === "enwiki") ? "&v=enwiki" : "";
     if(L.type === "sl"){
       return `sl=${encodeURIComponent(cleanSeed)}&max=18${v}`;
     } else if(L.type === "ml"){
@@ -918,16 +1018,14 @@
     } else if(L.type === "sp"){
       const pattern = cleanSeed.length >= 4 ? `*${cleanSeed}*` : `${cleanSeed}*`;
       return `sp=${encodeURIComponent(pattern)}&max=18${v}`;
-    } else {
-      // "mix"
-      return null;
     }
+    return null;
   }
 
   async function queryLayer(L, cleanSeed, vocab){
     try{
+      const v = (vocab === "es") ? "&v=es" : (vocab === "enwiki") ? "&v=enwiki" : "";
       if(L.type === "mix"){
-        const v = vocab === "es" ? "&v=es" : "";
         const a = await dm(`sl=${encodeURIComponent(cleanSeed)}&max=10${v}`);
         const b = await dm(`ml=${encodeURIComponent(cleanSeed)}&max=10${v}`);
         const c = await dm(`sp=${encodeURIComponent("*"+cleanSeed+"*")}&max=10${v}`);
@@ -941,6 +1039,15 @@
     }
   }
 
+  function getVocabPlan(){
+    const mode = getLangMode();
+    if(mode === "es") return ["es"];
+    if(mode === "mix") return ["en","es"];
+    if(mode === "de") return ["enwiki"];
+    if(mode === "en_de") return ["en","enwiki"];
+    return ["en"];
+  }
+
   async function runOneGeneration(seedWords){
     const layers = layerReasons();
     const seeds = [];
@@ -948,15 +1055,13 @@
       buildSeeds(sw).forEach(s => seeds.push(s));
     }
 
-    const mode = getLangMode(); // en / es / mix
-    const vocabs = (mode === "mix") ? ["en","es"] : [mode];
+    const vocabs = getVocabPlan();
 
     for(const L of layers){
       const seed = seeds[(state.seedCursor++) % seeds.length] || normalizeWord(state.inputWord);
       const cleanSeed = normalizeWord(seed);
       if(!cleanSeed || cleanSeed.length < 2) continue;
 
-      // run for each vocab (merge mode runs both)
       for(const vocab of vocabs){
         const results = await queryLayer(L, cleanSeed, vocab);
         for(const r of results){
@@ -987,7 +1092,6 @@
       state.used.add(item.word);
     }
 
-    // "novelty" here is mostly a health signal for new results
     const novelty = batch.length ? batch.filter(x=>x.isNew).length / batch.length : 0;
     return { batch, novelty };
   }
@@ -1013,66 +1117,171 @@
     `;
   }
 
-  function buildLinks(item){
-    const w = item.word;
+  // --------------------
+  // Lens (Pattern meaning)
+  // --------------------
+  const PATTERN_GLOSS = {
+    "Apophenia": {
+      meaning: "Seeing a loose connection or relationship between ideas that aren’t strictly related.",
+      example: (seed, w) => `"${seed}" → (loose association) → "${w}"`
+    },
+    "Phonosemantic": {
+      meaning: "A connection driven by pronunciation or syllable feel — the sound suggests a neighbor word.",
+      example: (seed, w) => `"${seed}" → (sound feel) → "${w}"`
+    },
+    "Phonetic Drift": {
+      meaning: "A sound-slide: small phoneme shifts (vowels/consonants/syllables) nudge one form toward another.",
+      example: (seed, w) => `"${seed}" → (sound-slide) → "${w}"`
+    },
+    "Semiotic": {
+      meaning: "A connection based on symbol/shape/glyph patterns — how the word looks or its visual structure.",
+      example: (seed, w) => `"${seed}" → (visual pattern) → "${w}"`
+    },
+    "Morphological": {
+      meaning: "A connection based on word structure — roots, affixes, stems, or structural reanalysis.",
+      example: (seed, w) => `"${seed}" → (structure shift) → "${w}"`
+    },
+    "Metaphorical": {
+      meaning: "A meaning leap through metaphor — adjacent ideas, imagery, or conceptual neighbors.",
+      example: (seed, w) => `"${seed}" → (metaphor) → "${w}"`
+    },
+    "Symbolic": {
+      meaning: "A connection through archetypes or symbols — cultural or thematic resonance.",
+      example: (seed, w) => `"${seed}" → (symbol) → "${w}"`
+    },
+    "Associative": {
+      meaning: "Spreading activation: activating one concept primes related concepts in memory networks.",
+      example: (seed, w) => `"${seed}" primes neighbors → "${w}"`
+    },
+    "Predictive": {
+      meaning: "A narrative completion move — the engine guesses a plausible continuation from the seed context.",
+      example: (seed, w) => `"${seed}" → (completion) → "${w}"`
+    }
+  };
 
-    const seedSound = item.seedByType?.get("sl");
-    const dictDotComQuery = seedSound || w;
-    const dictDotComLabel = seedSound ? "Dictionary.com (seed)" : "Dictionary.com";
-
-    const wiktionaryHref = `https://en.wiktionary.org/wiki/${encodeURIComponent(w)}`;
-
-    return `
-      <div class="tag-row">
-        <a class="tag brand-dict" rel="noopener noreferrer" target="_blank"
-           href="https://www.dictionary.com/browse/${encodeURIComponent(dictDotComQuery)}">${dictDotComLabel}</a>
-
-        <a class="tag brand-wikt" rel="noopener noreferrer" target="_blank"
-           href="${wiktionaryHref}">Wiktionary (exact)</a>
-
-        <a class="tag brand-wiki" rel="noopener noreferrer" target="_blank"
-           href="https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(w)}">Wikipedia</a>
-
-        <a class="tag brand-yt" rel="noopener noreferrer" target="_blank"
-           href="https://www.youtube.com/results?search_query=${encodeURIComponent(w)}">YouTube</a>
-
-        <a class="tag brand-web" rel="noopener noreferrer" target="_blank"
-           href="https://www.google.com/search?q=${encodeURIComponent(w)}">Web</a>
-      </div>
-    `;
+  function extractPatternName(reasonLine){
+    // reasonLine begins like: "Phonetic drift: ..."
+    const raw = (reasonLine || "").split(":")[0].trim();
+    // normalize capitalization to match keys
+    // handle "Phonetic drift" -> "Phonetic Drift"
+    return raw
+      .split(" ")
+      .map(x => x ? (x[0].toUpperCase() + x.slice(1).toLowerCase()) : x)
+      .join(" ");
   }
 
+  function extractSeed(reasonLine){
+    // tries to read: from "SEED" toward "WORD"
+    const m = (reasonLine || "").match(/from\s+"([^"]+)"/i);
+    return m ? m[1] : state.inputWord;
+  }
+
+  // --------------------
+  // Card render
+  // --------------------
   function buildCard(item){
     const div = document.createElement("div");
     div.className = "card";
     div.style.borderLeft = "3px solid var(--accent)";
     div.id = "scorecard";
 
+    const pair = getCollabPair();
+    const showToggle = !!pair;
+    const linkLang = showToggle ? (state.cardLinkLang || pair.a) : state.cardLinkLang;
+
+    const reasonLine = bestReason(item);
+    const patternName = extractPatternName(reasonLine);
+    const seed = extractSeed(reasonLine);
+    const gloss = PATTERN_GLOSS[patternName];
+
+    const lensBtnLabel = state.lensOpen ? "ⓘ Hide Pattern Meaning" : "ⓘ Pattern Meaning";
+
     div.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
         <div style="font-weight:1000; letter-spacing:1px;">
           PATTERN: <span class="mono">${escapeHtml(item.word.toUpperCase())}</span>
         </div>
-        <div class="muted" style="font-size:0.8rem; font-weight:900;">
-          SCORE: ${item.score.toFixed(2)}
+
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+          ${showToggle ? `
+            <button class="pill-btn" data-toggle-linklang title="Toggle scorecard link sources">
+              ${pair.labelA} ↔ ${pair.labelB} • ${linkLang.toUpperCase()}
+            </button>
+          ` : ""}
+
+          <div class="muted" style="font-size:0.8rem; font-weight:900;">
+            SCORE: ${item.score.toFixed(2)}
+          </div>
         </div>
       </div>
 
       <p class="muted" style="margin:10px 0 0; font-size:0.98rem; line-height:1.5;">
-        ${escapeHtml(bestReason(item))}
+        ${escapeHtml(reasonLine)}
       </p>
 
+      <div class="tag-row" style="margin-top:10px;">
+        <span class="tag brand-lens" data-toggle-lens>${lensBtnLabel}</span>
+      </div>
+
+      ${state.lensOpen && gloss ? `
+        <div class="lensBox">
+          <div class="muted" style="font-size:0.78rem; letter-spacing:2px; text-transform:uppercase; margin-bottom:6px;">Lens</div>
+          <div style="font-weight:900; letter-spacing:0.6px;">${escapeHtml(patternName)}</div>
+          <div class="muted" style="margin-top:6px; line-height:1.55;">
+            ${escapeHtml(gloss.meaning)}
+          </div>
+          <div class="muted" style="margin-top:8px;">
+            <span style="opacity:0.9;">Example:</span> ${escapeHtml(gloss.example(seed, item.word))}
+          </div>
+        </div>
+      ` : ""}
+
       ${anchorLine(item)}
-      ${buildLinks(item)}
+
+      <div class="tag-row">
+        ${buildLinksRowHTML(linkLang || "en", item.word)}
+      </div>
     `;
+
+    const toggleLangBtn = div.querySelector("[data-toggle-linklang]");
+    if(toggleLangBtn){
+      toggleLangBtn.addEventListener("click", ()=>{
+        const p = getCollabPair();
+        if(!p) return;
+        state.cardLinkLang = (state.cardLinkLang === p.a) ? p.b : p.a;
+        openSingleCard(item, { keepScroll:true });
+      });
+    }
+
+    const lensBtn = div.querySelector("[data-toggle-lens]");
+    if(lensBtn){
+      lensBtn.addEventListener("click", ()=>{
+        state.lensOpen = !state.lensOpen;
+        openSingleCard(item, { keepScroll:true });
+      });
+    }
+
     return div;
   }
 
-  function openSingleCard(item){
+  function openSingleCard(item, opts = {}){
+    state.activeCardItem = item;
+
+    const mode = getLangMode();
+    const pair = getCollabPair();
+    if(pair){
+      if(!state.cardLinkLang) state.cardLinkLang = pair.a;
+    } else {
+      state.cardLinkLang = (mode === "es") ? "es" : (mode === "de") ? "de" : "en";
+    }
+
     cardsArea.innerHTML = "";
     cardsArea.appendChild(buildCard(item));
     synthesisText.textContent = `"${item.word}" • ${bestReason(item)}`;
-    scrollToScorecard();
+
+    if(!opts.keepScroll){
+      scrollToScorecard();
+    }
   }
 
   function scrollToScorecard(){
@@ -1090,7 +1299,10 @@
       btn.className = "wordBtn";
       btn.textContent = item.word;
       btn.title = "Click to open";
-      btn.addEventListener("click", ()=> openSingleCard(item));
+      btn.addEventListener("click", ()=> {
+        state.lensOpen = false; // default collapsed each selection
+        openSingleCard(item);
+      });
       wordListEl.appendChild(btn);
     });
   }
@@ -1111,26 +1323,30 @@
     setBadge(t("checkingDict"));
     setStatus(t("validating"));
 
-    // Soft validation: check, but don't block.
-    // If merge mode: try English then Spanish (treat ok if either ok)
     const mode = getLangMode();
     let verdict = { ok:false, uncertain:false };
 
     if(mode === "mix"){
       const v1 = await dictCheck(raw, "en");
       const v2 = await dictCheck(raw, "es");
-      // If either is uncertain, mark uncertain (offline scenario)
       verdict.uncertain = v1.uncertain || v2.uncertain;
       verdict.ok = v1.ok || v2.ok || verdict.uncertain;
+    } else if(mode === "en_de"){
+      const v1 = await dictCheck(raw, "en");
+      const v2 = await dictCheck(raw, "de");
+      verdict.uncertain = v1.uncertain || v2.uncertain;
+      verdict.ok = v1.ok || v2.ok || verdict.uncertain;
+    } else if(mode === "es"){
+      verdict = await dictCheck(raw, "es");
+    } else if(mode === "de"){
+      verdict = await dictCheck(raw, "de");
     } else {
-      verdict = await dictCheck(raw, mode === "es" ? "es" : "en");
-      // allow anyway even if !ok
+      verdict = await dictCheck(raw, "en");
     }
 
-    // update badge (soft)
     languageBadgeFromVerdict(verdict);
 
-    // reset
+    // reset run
     state.inputWord = raw;
     state.generation = 1;
     state.used = new Set();
@@ -1138,8 +1354,22 @@
     state.allResults = [];
     state.poolMeta = new Map();
     state.seedCursor = 0;
+    state.activeCardItem = null;
+    state.lensOpen = false;
+
+    // reset toggles
+    const pair = getCollabPair();
+    if(pair){
+      state.cardLinkLang = pair.a;
+      state.mainLinkLang = pair.a;
+    } else {
+      state.cardLinkLang = (mode === "es") ? "es" : (mode === "de") ? "de" : "en";
+      state.mainLinkLang = state.cardLinkLang;
+    }
 
     displayWord.textContent = raw.toUpperCase();
+    renderMainWordLinks();
+
     setStatus(t("runningStack"));
 
     const { batch, novelty } = await runOneGeneration([raw]);
@@ -1200,11 +1430,16 @@
     state.allResults = [];
     state.poolMeta = new Map();
     state.seedCursor = 0;
+    state.activeCardItem = null;
+    state.lensOpen = false;
 
     displayWord.textContent = "—";
     wordListEl.innerHTML = "";
     cardsArea.innerHTML = "";
     synthesisText.textContent = t("synthDefault");
+
+    mainWordLinks.style.display = "none";
+    mainWordLinks.innerHTML = "";
 
     setBadge(t("awaiting"));
     setStatus(t("cleared"));
@@ -1267,18 +1502,18 @@
     }
   });
 
+  // --------------------
   // Boot
+  // --------------------
   (function boot(){
-    // load persisted theme/lang
     setTheme(getTheme());
     const savedLang = localStorage.getItem(LANG_KEY) || "en";
     langSelect.value = savedLang;
-    applyUiText();
 
+    applyUiText();
     renderSavedRuns();
     clearOutput();
   })();
 </script>
 </body>
 </html>
-```0
